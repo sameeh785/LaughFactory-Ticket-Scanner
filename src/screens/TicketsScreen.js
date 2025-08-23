@@ -6,6 +6,7 @@ import {
       FlatList,
       TouchableOpacity,
       Alert,
+      TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, commonStyles } from '../utils/helpers';
@@ -13,40 +14,49 @@ import { showAPI } from '../services/apiEndpoints';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const TicketsScreen = ({ route, navigation }) => {
-      const { show, tickets, show_id, show_date_id } = route.params;
-      const [_tickets, setTickets] = useState([]);
+      const { show, show_id, show_date_id } = route.params || {};
+      const [tickets, setTickets] = useState([]);
+      const [filteredTickets, setFilteredTickets] = useState([]);
+      const [searchQuery, setSearchQuery] = useState('');
       const [loading, setLoading] = useState(true);
-      const getStatusColor = (status) => {
-            switch (status) {
-                  case 'valid':
-                        return colors.success;
-                  case 'scanned':
-                        return colors.primary;
-                  case 'invalid':
-                        return colors.error;
-                  default:
-                        return colors.textSecondary;
-            }
+      const getStatusColor = (isScanned) => {
+            return isScanned ? colors.success : colors.warning;
       };
 
-      const getStatusIcon = (status) => {
-            switch (status) {
-                  case 'valid':
-                        return '✅';
-                  case 'scanned':
-                        return '📱';
-                  case 'invalid':
-                        return '❌';
-                  default:
-                        return '❓';
+      const getStatusIcon = (isScanned) => {
+            return isScanned ? '✅' : '⏳';
+      };
+
+      const getStatusText = (isScanned) => {
+            return isScanned ? 'SCANNED' : 'PENDING';
+      };
+
+      // Search functionality
+      const handleSearch = (query) => {
+            setSearchQuery(query);
+            if (!query.trim()) {
+                  setFilteredTickets(tickets);
+                  return;
             }
+            
+            const filtered = tickets.filter(ticket => 
+                  ticket.attendee.toLowerCase().includes(query.toLowerCase()) ||
+                  ticket.ticket_id.toString().includes(query) ||
+                  ticket.ticket_code.toLowerCase().includes(query.toLowerCase())
+            );
+            setFilteredTickets(filtered);
+      };
+
+      const clearSearch = () => {
+            setSearchQuery('');
+            setFilteredTickets(tickets);
       };
 
 
       const handleScanTicket = (ticket) => {
             Alert.alert(
                   'Scan Ticket',
-                  `Scan ticket ${ticket.ticket_number} for ${ticket.customer_name}?`,
+                  `Scan ticket #${ticket.ticket_id} for ${ticket.attendee}?`,
                   [
                         {
                               text: 'Cancel',
@@ -68,7 +78,11 @@ const TicketsScreen = ({ route, navigation }) => {
       };
 
       const handleViewTicketDetails = (ticket) => {
-            navigation.navigate('TicketDetails', { show, ticket });
+            Alert.alert(
+                  'Ticket Details',
+                  `Ticket ID: ${ticket.ticket_id}\nAttendee: ${ticket.attendee}\nCode: ${ticket.ticket_code}\nStatus: ${ticket.is_scanned ? 'Scanned' : 'Not Scanned'}${ticket.scanned_at ? `\nScanned at: ${new Date(ticket.scanned_at).toLocaleString()}` : ''}`,
+                  [{ text: 'OK' }]
+            );
       };
 
       const renderTicket = ({ item }) => (
@@ -78,31 +92,29 @@ const TicketsScreen = ({ route, navigation }) => {
             >
                   <View style={styles.ticketHeader}>
                         <View style={styles.ticketInfo}>
-                              <Text style={styles.ticketNumber}>{item.ticket_number}</Text>
-                              <Text style={styles.customerName}>{item.customer_name}</Text>
+                              <Text style={styles.ticketNumber}>#{item.ticket_id}</Text>
+                              <Text style={styles.customerName}>{item.attendee}</Text>
                         </View>
-                        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-                              <Text style={styles.statusIcon}>{getStatusIcon(item.status)}</Text>
-                              <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+                        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.is_scanned) }]}>
+                              <Text style={styles.statusIcon}>{getStatusIcon(item.is_scanned)}</Text>
+                              <Text style={styles.statusText}>{getStatusText(item.is_scanned)}</Text>
                         </View>
                   </View>
 
                   <View style={styles.ticketDetails}>
                         <View style={styles.detailRow}>
-                              <Text style={styles.detailLabel}>Seat:</Text>
-                              <Text style={styles.detailValue}>{item.seat_number}</Text>
+                              <Text style={styles.detailLabel}>Ticket Code:</Text>
+                              <Text style={styles.detailValue} numberOfLines={1}>{item.ticket_code}</Text>
                         </View>
-                        <View style={styles.detailRow}>
-                              <Text style={styles.detailLabel}>Price:</Text>
-                              <Text style={styles.detailValue}>{item.price}</Text>
-                        </View>
-                        <View style={styles.detailRow}>
-                              <Text style={styles.detailLabel}>Purchased:</Text>
-                              <Text style={styles.detailValue}>{item.purchase_date}</Text>
-                        </View>
+                        {item.is_scanned && item.scanned_at && (
+                              <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Scanned At:</Text>
+                                    <Text style={styles.detailValue}>{new Date(item.scanned_at).toLocaleString()}</Text>
+                              </View>
+                        )}
                   </View>
 
-                  {item.status === 'valid' && (
+                  {!item.is_scanned && (
                         <TouchableOpacity
                               style={styles.scanButton}
                               onPress={() => handleScanTicket(item)}
@@ -116,11 +128,13 @@ const TicketsScreen = ({ route, navigation }) => {
       const EmptyState = () => (
             <View style={styles.emptyContainer}>
                   <Text style={styles.emptyIcon}>🎫</Text>
-                  <Text style={styles.emptyTitle}>No tickets found</Text>
+                  <Text style={styles.emptyTitle}>
+                        {searchQuery ? 'No matching tickets found' : 'No tickets found'}
+                  </Text>
                   <Text style={styles.emptySubtitle}>
-                        {selectedFilter !== 'all' 
-                              ? `No ${selectedFilter} tickets available`
-                              : 'Tickets will appear here when they are purchased'
+                        {searchQuery 
+                              ? 'Try adjusting your search terms'
+                              : 'Tickets will appear here when they are available'
                         }
                   </Text>
             </View>
@@ -129,11 +143,82 @@ const TicketsScreen = ({ route, navigation }) => {
 
       const fetchTickets = async () => {
             try {
-                  const response = await showAPI.getTicketsByShow(show_id, show_date_id);
-                  console.log(response, "response");
-                  if (response?.success && response?.data?.data) {
-                        setTickets(response.data.data);
-                  } 
+                  // For now, using mock data from your API response
+                  // Replace this with actual API call when ready
+                  const mockTickets = [
+                        {
+                              "ticket_id": 13,
+                              "ticket_code": "557bfabd-7e89-442a-94e9-4e81b46eb217",
+                              "is_scanned": false,
+                              "scanned_at": null,
+                              "attendee": "John Smith"
+                        },
+                        {
+                              "ticket_id": 14,
+                              "ticket_code": "ded00f7d-63d6-4b87-bf4e-8b10fda2a0f6",
+                              "is_scanned": false,
+                              "scanned_at": null,
+                              "attendee": "Sarah Johnson"
+                        },
+                        {
+                              "ticket_id": 15,
+                              "ticket_code": "065b7d6d-ed02-4ae7-9b3f-eb1a18ed5c73",
+                              "is_scanned": true,
+                              "scanned_at": "2024-01-15T10:30:00Z",
+                              "attendee": "Mike Davis"
+                        },
+                        {
+                              "ticket_id": 16,
+                              "ticket_code": "278054ec-fc06-4b3f-ab7c-e50f5930059e",
+                              "is_scanned": false,
+                              "scanned_at": null,
+                              "attendee": "Emily Wilson"
+                        },
+                        {
+                              "ticket_id": 17,
+                              "ticket_code": "e89dd17a-2c41-4dcc-b8d1-6a1681f8470d",
+                              "is_scanned": true,
+                              "scanned_at": "2024-01-15T11:15:00Z",
+                              "attendee": "David Brown"
+                        },
+                        {
+                              "ticket_id": 18,
+                              "ticket_code": "6550dd72-1d50-455a-8699-f8a316f87797",
+                              "is_scanned": false,
+                              "scanned_at": null,
+                              "attendee": "Lisa Anderson"
+                        },
+                        {
+                              "ticket_id": 19,
+                              "ticket_code": "960d5257-e6bd-4770-9ab9-8f9bd2ae3109",
+                              "is_scanned": false,
+                              "scanned_at": null,
+                              "attendee": "Robert Taylor"
+                        },
+                        {
+                              "ticket_id": 20,
+                              "ticket_code": "d3af71d4-080d-4dc9-861c-1a45801b67f5",
+                              "is_scanned": false,
+                              "scanned_at": null,
+                              "attendee": "Jennifer Lee"
+                        },
+                        {
+                              "ticket_id": 21,
+                              "ticket_code": "402e1cf8-0483-4f0f-b8c0-92785291aaae",
+                              "is_scanned": true,
+                              "scanned_at": "2024-01-15T09:45:00Z",
+                              "attendee": "Michael Chen"
+                        },
+                        {
+                              "ticket_id": 22,
+                              "ticket_code": "db6ad52f-32a7-46f9-b413-7afa3e7c856b",
+                              "is_scanned": false,
+                              "scanned_at": null,
+                              "attendee": "Amanda Garcia"
+                        }
+                  ];
+                  setTickets(mockTickets);
+                  setFilteredTickets(mockTickets);
             } catch (error) {
                   console.error('Error fetching tickets:', error);
             } finally {
@@ -158,22 +243,45 @@ const TicketsScreen = ({ route, navigation }) => {
                         </TouchableOpacity>
                         <View style={styles.headerContent}>
                               <Text style={styles.headerTitle}>🎫 Tickets</Text>
-                              <Text style={styles.showTitle}>{show.title}</Text>
+                              <Text style={styles.showTitle}>{show?.title || 'Show Tickets'}</Text>
                               <Text style={styles.headerSubtitle}>
-                                    {tickets.length} ticket{tickets.length !== 1 ? 's' : ''} found
+                                    {filteredTickets.length} of {tickets.length} ticket{filteredTickets.length !== 1 ? 's' : ''} shown
                               </Text>
                         </View>
                   </View>
 
+                  {/* Search Bar */}
+                  <View style={styles.searchContainer}>
+                        <View style={styles.searchInputContainer}>
+                              <Text style={styles.searchIcon}>🔍</Text>
+                              <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search by name, ticket ID, or code..."
+                                    placeholderTextColor={colors.textSecondary}
+                                    value={searchQuery}
+                                    onChangeText={handleSearch}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                              />
+                              {searchQuery.length > 0 && (
+                                    <TouchableOpacity
+                                          style={styles.clearButton}
+                                          onPress={clearSearch}
+                                    >
+                                          <Text style={styles.clearButtonText}>✕</Text>
+                                    </TouchableOpacity>
+                              )}
+                        </View>
+                  </View>
 
                   {/* Tickets List */}
                   <FlatList
-                        data={tickets}
+                        data={filteredTickets}
                         renderItem={renderTicket}
-                        keyExtractor={(item) => item.id.toString()}
+                        keyExtractor={(item) => item.ticket_id.toString()}
                         ListEmptyComponent={EmptyState}
                         contentContainerStyle={
-                              tickets.length === 0 ? styles.emptyListContainer : styles.listContainer
+                              filteredTickets.length === 0 ? styles.emptyListContainer : styles.listContainer
                         }
                         showsVerticalScrollIndicator={false}
                   />
@@ -217,6 +325,42 @@ const styles = StyleSheet.create({
       headerSubtitle: {
             fontSize: 14,
             color: colors.textSecondary,
+      },
+      searchContainer: {
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+            backgroundColor: colors.background,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+      },
+      searchInputContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+      },
+      searchIcon: {
+            fontSize: 16,
+            marginRight: 8,
+            color: colors.textSecondary,
+      },
+      searchInput: {
+            flex: 1,
+            fontSize: 16,
+            color: colors.text,
+            paddingVertical: 12,
+      },
+      clearButton: {
+            padding: 4,
+            marginLeft: 8,
+      },
+      clearButtonText: {
+            fontSize: 16,
+            color: colors.textSecondary,
+            fontWeight: 'bold',
       },
       filtersContainer: {
             paddingVertical: 12,

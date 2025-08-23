@@ -115,6 +115,10 @@ export const AuthProvider = ({ children }) => {
                               type: ActionTypes.LOGIN_SUCCESS,
                               payload: response.data,
                         });
+
+                        // set token in async storage
+                        await apiService.setAuthToken(response?.data?.data?.token);
+
                         return { success: true };
                   } else {
                         dispatch({

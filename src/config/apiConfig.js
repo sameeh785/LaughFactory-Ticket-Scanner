@@ -1,13 +1,13 @@
-import { API_BASE_URL, API_TIMEOUT } from '@env';
-
 /**
  * API Configuration
  * Centralized configuration for API endpoints and settings
  */
 export const API_CONFIG = {
       // Base URLs
-      BASE_URL:  API_BASE_URL,
-      TIMEOUT: API_TIMEOUT || 10000,
+      BASE_URL: process.env.EXPO_PUBLIC_API_URL,
+      TIMEOUT: process.env.EXPO_PUBLIC_API_TIMEOUT || 10000,
+      BASIC_AUTH_USERNAME: process.env.EXPO_PUBLIC_BASIC_AUTH_USERNAME,
+      BASIC_AUTH_PASSWORD: process.env.EXPO_PUBLIC_BASIC_AUTH_PASSWORD,
 
       // API Endpoints
       ENDPOINTS: {
@@ -17,8 +17,8 @@ export const API_CONFIG = {
             UPDATE_PASSWORD: '/auth/update-password',
 
             // App endpoints
+            shows: '/get-shows-by-club',
             STATS: '/dashboard/stats',
-            EVENTS: '/events',
             SCAN_TICKET: '/tickets/scan',
             PROFILE: '/user/profile',
 

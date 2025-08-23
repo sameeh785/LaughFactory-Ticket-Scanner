@@ -7,7 +7,6 @@ import {
       KeyboardAvoidingView,
       Platform,
       TouchableOpacity,
-      Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
@@ -27,7 +26,6 @@ const LoginScreen = ({ navigation }) => {
       const { login, error: authError, clearError } = useAuth();
 
       const handleInputChange = (field, value) => {
-            console.log("samii")
             setFormData(prev => ({
                   ...prev,
                   [field]: value,
@@ -152,7 +150,7 @@ const LoginScreen = ({ navigation }) => {
                                                 </View>
                                           )}
 
-                                          <TouchableOpacity
+                                          {/* <TouchableOpacity
                                                 style={styles.forgotPasswordContainer}
                                                 onPress={navigateToForgotPassword}
                                           >
@@ -160,7 +158,7 @@ const LoginScreen = ({ navigation }) => {
                                                       Forgot your password?
                                                 </Text>
                                           </TouchableOpacity>
-
+*/}
                                           <Button
                                                 title="Sign In"
                                                 onPress={handleLogin}

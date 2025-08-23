@@ -8,11 +8,12 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 // Import screens
 import LoginScreen from '../screens/LoginScreen';
+import ShowsScreen from '../screens/ShowsScreen';
+import LogoutScreen from '../screens/LogoutScreen';
+// TODO: Screen to be removed
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import DashboardScreen from '../screens/DashboardScreen';
-import EventsScreen from '../screens/EventsScreen';
 import QRScannerScreen from '../screens/QRScannerScreen';
-import ProfileScreen from '../screens/ProfileScreen';
 
 // Create navigators
 const Stack = createStackNavigator();
@@ -65,22 +66,22 @@ const MainTabs = () => {
                         }}
                   />
                   <Tab.Screen
-                        name="Events"
-                        component={EventsScreen}
+                        name="Shows"
+                        component={ShowsScreen}
                         options={{
-                              tabBarLabel: 'Events',
+                              tabBarLabel: 'Shows',
                               tabBarIcon: ({ focused }) => (
                                     <Text style={{ fontSize: 20 }}>{focused ? '🎭' : '🎪'}</Text>
                               ),
                         }}
                   />
                   <Tab.Screen
-                        name="Profile"
-                        component={ProfileScreen}
+                        name="Logout"
+                        component={LogoutScreen}
                         options={{
-                              tabBarLabel: 'Profile',
+                              tabBarLabel: 'Logout',
                               tabBarIcon: ({ focused }) => (
-                                    <Text style={{ fontSize: 20 }}>{focused ? '👤' : '👥'}</Text>
+                                    <Text style={{ fontSize: 20 }}>{focused ? '🚪' : '🚪'}</Text>
                               ),
                         }}
                   />

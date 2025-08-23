@@ -8,40 +8,41 @@ import {
       TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { eventsAPI } from '../services/apiEndpoints';
+import { showAPI } from '../services/apiEndpoints';
 import EventCard from '../components/EventCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Input from '../components/Input';
 import { colors, commonStyles, debounce } from '../utils/helpers';
 
-const EventsScreen = ({ navigation }) => {
-      const [events, setEvents] = useState([]);
-      const [filteredEvents, setFilteredEvents] = useState([]);
+const ShowsScreen = ({ navigation }) => {
+      const [shows, setShows] = useState([]);
+      const [filteredShows, setFilteredShows] = useState([]);
       const [loading, setLoading] = useState(true);
       const [refreshing, setRefreshing] = useState(false);
       const [searchQuery, setSearchQuery] = useState('');
       const [selectedFilter, setSelectedFilter] = useState('all');
 
       const filters = [
-            { key: 'all', label: 'All Events', icon: '🎭' },
+            { key: 'all', label: 'All Shows', icon: '🎭' },
             { key: 'active', label: 'Active', icon: '🟢' },
             { key: 'upcoming', label: 'Upcoming', icon: '🔵' },
             { key: 'completed', label: 'Completed', icon: '⚫' },
       ];
 
       useEffect(() => {
-            fetchEvents();
+            fetchShows();
       }, []);
 
       useEffect(() => {
             filterEvents();
-      }, [events, searchQuery, selectedFilter]);
+      }, [shows, searchQuery, selectedFilter]);
 
-      const fetchEvents = async () => {
+      console.log(shows, "shows");
+      const fetchShows = async () => {
             try {
-                  const response = await eventsAPI.getEvents();
-                  if (response.success) {
-                        setEvents(response.data);
+                  const response = await showAPI.getShowsByClub(process.env.EXPO_PUBLIC_CLUB_ID);
+                  if (response?.success && response?.data?.data?.length > 0) {
+                        setShows(response.data.data);
                   } else {
                         console.error('Failed to fetch events:', response.error);
                   }
@@ -54,12 +55,12 @@ const EventsScreen = ({ navigation }) => {
 
       const onRefresh = async () => {
             setRefreshing(true);
-            await fetchEvents();
+            await fetchShows();
             setRefreshing(false);
       };
 
       const filterEvents = () => {
-            let filtered = [...events];
+            let filtered = [...shows];
 
             // Apply status filter
             if (selectedFilter !== 'all') {
@@ -76,7 +77,7 @@ const EventsScreen = ({ navigation }) => {
                   );
             }
 
-            setFilteredEvents(filtered);
+            setFilteredShows(filtered);
       };
 
       const debouncedSearch = debounce((query) => {
@@ -121,12 +122,12 @@ const EventsScreen = ({ navigation }) => {
             <View style={styles.emptyContainer}>
                   <Text style={styles.emptyIcon}>🎭</Text>
                   <Text style={styles.emptyTitle}>
-                        {searchQuery ? 'No events found' : 'No events available'}
+                        {searchQuery ? 'No shows found' : 'No shows available'}
                   </Text>
                   <Text style={styles.emptySubtitle}>
                         {searchQuery
                               ? 'Try adjusting your search or filter criteria'
-                              : 'Events will appear here when they are created'
+                              : 'Shows will appear here when they are created'
                         }
                   </Text>
                   {searchQuery && (
@@ -144,22 +145,22 @@ const EventsScreen = ({ navigation }) => {
       );
 
       if (loading) {
-            return <LoadingSpinner text="Loading events..." />;
+            return <LoadingSpinner text="Loading shows..." />;
       }
 
       return (
             <SafeAreaView style={styles.container}>
                   <View style={styles.header}>
-                        <Text style={styles.headerTitle}>🎭 Events</Text>
+                              <Text style={styles.headerTitle}>🎭 Shows</Text>
                         <Text style={styles.headerSubtitle}>
-                              {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} found
+                              {filteredShows.length} show{filteredShows.length !== 1 ? 's' : ''} found
                         </Text>
                   </View>
 
                   {/* Search Bar */}
                   <View style={styles.searchContainer}>
                         <Input
-                              placeholder="Search events..."
+                              placeholder="Search shows..."
                               onChangeText={debouncedSearch}
                               leftIcon={<Text style={styles.searchIcon}>🔍</Text>}
                               style={styles.searchInput}
@@ -180,7 +181,7 @@ const EventsScreen = ({ navigation }) => {
 
                   {/* Events List */}
                   <FlatList
-                        data={filteredEvents}
+                        data={filteredShows}
                         renderItem={renderEvent}
                         keyExtractor={(item) => item.id.toString()}
                         refreshControl={
@@ -188,7 +189,7 @@ const EventsScreen = ({ navigation }) => {
                         }
                         ListEmptyComponent={EmptyState}
                         contentContainerStyle={
-                              filteredEvents.length === 0 ? styles.emptyListContainer : styles.listContainer
+                              filteredShows.length === 0 ? styles.emptyListContainer : styles.listContainer
                         }
                         showsVerticalScrollIndicator={false}
                   />
@@ -304,4 +305,4 @@ const styles = StyleSheet.create({
       },
 });
 
-export default EventsScreen;
+export default  ShowsScreen;

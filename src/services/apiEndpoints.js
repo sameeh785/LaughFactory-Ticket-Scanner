@@ -12,11 +12,12 @@ export const authAPI = {
        */
       login: async (email, password) => {
             try {
-                  console.log('login', email, password);
                   // Real API call (when backend is ready)
                   return await apiService.post(API_CONFIG.ENDPOINTS.LOGIN, {
                         email,
                         password
+                  },{
+                        isLoginScreen: true
                   });
             } catch (error) {
                   return {
@@ -137,66 +138,16 @@ export const dashboardAPI = {
 /**
  * Events API calls
  */
-export const eventsAPI = {
+export const showAPI = {
       /**
        * Get all events
        */
-      getEvents: async () => {
+      getShowsByClub: async (clubId) => {
             try {
-                  if (__DEV__) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        return {
-                              success: true,
-                              data: [
-                                    {
-                                          id: 1,
-                                          title: 'Comedy Night Special',
-                                          date: '2025-07-05',
-                                          time: '8:00 PM',
-                                          venue: 'LaughFactory Main Stage',
-                                          description: 'Special comedy night featuring top comedians',
-                                          ticketsScanned: 45,
-                                          totalTickets: 200,
-                                          status: 'active'
-                                    },
-                                    {
-                                          id: 2,
-                                          title: 'Stand-up Championship',
-                                          date: '2025-07-06',
-                                          time: '9:00 PM',
-                                          venue: 'LaughFactory Studio',
-                                          description: 'Annual stand-up comedy championship',
-                                          ticketsScanned: 32,
-                                          totalTickets: 150,
-                                          status: 'active'
-                                    },
-                                    {
-                                          id: 3,
-                                          title: 'Open Mic Night',
-                                          date: '2025-07-07',
-                                          time: '7:30 PM',
-                                          venue: 'LaughFactory Lounge',
-                                          description: 'Open mic night for aspiring comedians',
-                                          ticketsScanned: 12,
-                                          totalTickets: 80,
-                                          status: 'upcoming'
-                                    },
-                                    {
-                                          id: 4,
-                                          title: 'Weekend Comedy Blast',
-                                          date: '2025-07-08',
-                                          time: '8:30 PM',
-                                          venue: 'LaughFactory Main Stage',
-                                          description: 'Weekend special with multiple performers',
-                                          ticketsScanned: 67,
-                                          totalTickets: 250,
-                                          status: 'active'
-                                    }
-                              ]
-                        };
-                  }
 
-                  return await apiService.get(API_CONFIG.ENDPOINTS.EVENTS);
+                  return await apiService.get(`${API_CONFIG.ENDPOINTS.shows}/${clubId}`,{
+                        includeAuth: true,
+                  });
             } catch (error) {
                   return {
                         success: false,
@@ -205,29 +156,6 @@ export const eventsAPI = {
             }
       },
 
-      /**
-       * Get single event details
-       * @param {number} eventId - Event ID
-       */
-      getEventById: async (eventId) => {
-            try {
-                  if (__DEV__) {
-                        const events = await eventsAPI.getEvents();
-                        const event = events.data.find(e => e.id === eventId);
-                        return {
-                              success: true,
-                              data: event || null
-                        };
-                  }
-
-                  return await apiService.get(`${API_CONFIG.ENDPOINTS.EVENTS}/${eventId}`);
-            } catch (error) {
-                  return {
-                        success: false,
-                        error: error.message || 'Failed to fetch event details'
-                  };
-            }
-      }
 };
 
 /**

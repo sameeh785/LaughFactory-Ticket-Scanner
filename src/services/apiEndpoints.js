@@ -16,7 +16,7 @@ export const authAPI = {
                   return await apiService.post(API_CONFIG.ENDPOINTS.LOGIN, {
                         email,
                         password
-                  },{
+                  }, {
                         isLoginScreen: true
                   });
             } catch (error) {
@@ -145,13 +145,29 @@ export const showAPI = {
       getShowsByClub: async (clubId) => {
             try {
 
-                  return await apiService.get(`${API_CONFIG.ENDPOINTS.shows}/${clubId}`,{
+                  return await apiService.get(`${API_CONFIG.ENDPOINTS.SHOWS}/${clubId}`, {
                         includeAuth: true,
                   });
             } catch (error) {
                   return {
                         success: false,
                         error: error.message || 'Failed to fetch events'
+                  };
+            }
+      },
+      getTicketsByShow: async (show_id, show_date_id) => {
+            try {
+                  return await apiService.post(`${API_CONFIG.ENDPOINTS.SHOW_TICKETS}`, {
+                        show_id,
+
+                        show_date_id,
+                  }, {
+                        includeAuth: true,
+                  });
+            } catch (error) {
+                  return {
+                        success: false,
+                        error: error.message || 'Failed to fetch tickets'
                   };
             }
       },
@@ -164,48 +180,22 @@ export const showAPI = {
 export const scanAPI = {
       /**
        * Scan ticket QR code
-       * @param {string} qrData - QR code data
-       * @param {number} eventId - Event ID
+       * @param {number} show_id - Show ID
+       * @param {number} show_date_id - Show date ID
+       * @param {string} ticket_code - Ticket code
        */
-      scanTicket: async (qrData, eventId) => {
+      scanTicket: async (show_id, show_date_id, ticket_code) => {
             try {
-                  if (__DEV__) {
-                        await new Promise(resolve => setTimeout(resolve, 1500));
 
-                        // Mock scan result
-                        const isValid = qrData && qrData.length > 10; // Simple validation
-
-                        if (isValid) {
-                              return {
-                                    success: true,
-                                    data: {
-                                          ticketId: qrData,
-                                          eventId: eventId,
-                                          holderName: 'Jane Smith',
-                                          ticketType: 'General Admission',
-                                          seatNumber: 'A-15',
-                                          scanTime: new Date().toISOString(),
-                                          status: 'valid',
-                                          message: 'Ticket scanned successfully'
-                                    }
-                              };
-                        } else {
-                              return {
-                                    success: false,
-                                    error: 'Invalid QR code',
-                                    data: {
-                                          status: 'invalid',
-                                          message: 'This QR code is not valid for this event'
-                                    }
-                              };
-                        }
-                  }
 
                   return await apiService.post(API_CONFIG.ENDPOINTS.SCAN_TICKET, {
-                        qrData,
-                        eventId,
-                        scanTime: new Date().toISOString()
-                  });
+                        show_id,
+                        show_date_id,
+                        ticket_code,
+                    }, {
+                        includeAuth: true,
+                  }
+                  );
             } catch (error) {
                   return {
                         success: false,

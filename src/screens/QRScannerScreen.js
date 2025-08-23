@@ -15,8 +15,11 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { colors, commonStyles, isValidQRCode } from '../utils/helpers';
 
 const QRScannerScreen = ({ navigation, route }) => {
-      const { event } = route.params;
-
+      const { show, ticket, mode } = route.params;
+                 console.log(route.params, "route.params");
+      console.log(show, "show");
+      console.log(ticket, "ticket");
+      console.log(mode, "mode");
       const [hasPermission, setHasPermission] = useState(null);
       const [scanned, setScanned] = useState(false);
       const [scanning, setScanning] = useState(false);
@@ -35,8 +38,8 @@ const QRScannerScreen = ({ navigation, route }) => {
       const handleBarCodeScanned = async ({ type, data }) => {
             const now = Date.now();
 
-            // Prevent rapid scanning of the same code
-            if (now - lastScanTime < 2000) {
+            // Prevent rapid scanning of the same code 5 seconds
+            if (now - lastScanTime < 5000) {
                   return;
             }
 
@@ -67,7 +70,7 @@ const QRScannerScreen = ({ navigation, route }) => {
                   }
 
                   // Call scan API
-                  const response = await scanAPI.scanTicket(data, event.id);
+                  const response = await scanAPI.scanTicket(data, show.id);
 
                   if (response.success) {
                         const ticketData = response.data;
@@ -190,7 +193,7 @@ const QRScannerScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                         <View style={styles.headerCenter}>
                               <Text style={styles.headerTitle}>QR Scanner</Text>
-                              <Text style={styles.headerSubtitle}>{event.title}</Text>
+                              <Text style={styles.headerSubtitle}>{show.title}</Text>
                         </View>
                         <TouchableOpacity
                               style={styles.flashButton}
@@ -256,21 +259,18 @@ const QRScannerScreen = ({ navigation, route }) => {
                   {/* Stats Footer */}
                   <View style={styles.statsFooter}>
                         <View style={styles.statItem}>
-                              <Text style={styles.statValue}>{event.ticketsScanned}</Text>
+                              <Text style={styles.statValue}>2</Text>
                               <Text style={styles.statLabel}>Scanned</Text>
                         </View>
                         <View style={styles.statDivider} />
                         <View style={styles.statItem}>
-                              <Text style={styles.statValue}>{event.totalTickets}</Text>
+                              <Text style={styles.statValue}>2</Text>
                               <Text style={styles.statLabel}>Total</Text>
                         </View>
                         <View style={styles.statDivider} />
                         <View style={styles.statItem}>
                               <Text style={styles.statValue}>
-                                    {event.totalTickets > 0
-                                          ? Math.round((event.ticketsScanned / event.totalTickets) * 100)
-                                          : 0
-                                    }%
+                                    0%
                               </Text>
                               <Text style={styles.statLabel}>Progress</Text>
                         </View>

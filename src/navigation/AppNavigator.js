@@ -10,10 +10,9 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import LoginScreen from '../screens/LoginScreen';
 import ShowsScreen from '../screens/ShowsScreen';
 import LogoutScreen from '../screens/LogoutScreen';
-// TODO: Screen to be removed
-import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
-import DashboardScreen from '../screens/DashboardScreen';
 import QRScannerScreen from '../screens/QRScannerScreen';
+import TicketsScreen from '../screens/TicketsScreen';
+
 
 // Create navigators
 const Stack = createStackNavigator();
@@ -28,7 +27,6 @@ const AuthStack = () => {
                   }}
             >
                   <Stack.Screen name="Login" component={LoginScreen} />
-                  <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
             </Stack.Navigator>
       );
 };
@@ -55,16 +53,6 @@ const MainTabs = () => {
                         },
                   }}
             >
-                  <Tab.Screen
-                        name="Dashboard"
-                        component={DashboardScreen}
-                        options={{
-                              tabBarLabel: 'Dashboard',
-                              tabBarIcon: ({ focused }) => (
-                                    <Text style={{ fontSize: 20 }}>{focused ? '📊' : '📈'}</Text>
-                              ),
-                        }}
-                  />
                   <Tab.Screen
                         name="Shows"
                         component={ShowsScreen}
@@ -103,6 +91,13 @@ const AppStack = () => {
                         component={QRScannerScreen}
                         options={{
                               presentation: 'modal',
+                        }}
+                  />
+                  <Stack.Screen
+                        name="TicketsScreen"
+                        component={TicketsScreen}
+                        options={{
+                              presentation: 'card',
                         }}
                   />
             </Stack.Navigator>

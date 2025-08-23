@@ -17,9 +17,10 @@ export const API_CONFIG = {
             UPDATE_PASSWORD: '/auth/update-password',
 
             // App endpoints
-            shows: '/get-shows-by-club',
+            SHOWS: '/get-shows-by-club',
+            SHOW_TICKETS: '/all-show-tickets',
+            SCAN_TICKET: '/scan-ticket',
             STATS: '/dashboard/stats',
-            SCAN_TICKET: '/tickets/scan',
             PROFILE: '/user/profile',
 
             // Dummy endpoints for development (using JSONPlaceholder)

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { showAPI } from '../services/apiEndpoints';
-import EventCard from '../components/EventCard';
+import ShowCard from '../components/ShowCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Input from '../components/Input';
 import { colors, commonStyles, debounce } from '../utils/helpers';
@@ -20,34 +20,26 @@ const ShowsScreen = ({ navigation }) => {
       const [loading, setLoading] = useState(true);
       const [refreshing, setRefreshing] = useState(false);
       const [searchQuery, setSearchQuery] = useState('');
-      const [selectedFilter, setSelectedFilter] = useState('all');
 
-      const filters = [
-            { key: 'all', label: 'All Shows', icon: '🎭' },
-            { key: 'active', label: 'Active', icon: '🟢' },
-            { key: 'upcoming', label: 'Upcoming', icon: '🔵' },
-            { key: 'completed', label: 'Completed', icon: '⚫' },
-      ];
 
       useEffect(() => {
             fetchShows();
       }, []);
 
       useEffect(() => {
-            filterEvents();
-      }, [shows, searchQuery, selectedFilter]);
+            filterShows();
+      }, [shows, searchQuery]);
 
-      console.log(shows, "shows");
       const fetchShows = async () => {
             try {
                   const response = await showAPI.getShowsByClub(process.env.EXPO_PUBLIC_CLUB_ID);
                   if (response?.success && response?.data?.data?.length > 0) {
                         setShows(response.data.data);
                   } else {
-                        console.error('Failed to fetch events:', response.error);
+                        console.error('Failed to fetch shows:', response.error);
                   }
             } catch (error) {
-                  console.error('Error fetching events:', error);
+                  console.error('Error fetching shows:', error);
             } finally {
                   setLoading(false);
             }
@@ -59,62 +51,89 @@ const ShowsScreen = ({ navigation }) => {
             setRefreshing(false);
       };
 
-      const filterEvents = () => {
+      const filterShows = () => {
             let filtered = [...shows];
-
-            // Apply status filter
-            if (selectedFilter !== 'all') {
-                  filtered = filtered.filter(event => event.status === selectedFilter);
-            }
-
             // Apply search filter
             if (searchQuery.trim()) {
                   const query = searchQuery.toLowerCase();
-                  filtered = filtered.filter(event =>
-                        event.title.toLowerCase().includes(query) ||
-                        event.venue.toLowerCase().includes(query) ||
-                        event.description.toLowerCase().includes(query)
+                  filtered = filtered.filter(show =>
+                        show.title.toLowerCase().includes(query) ||
+                        show.description.toLowerCase().includes(query) ||
+                        (show.comedians && show.comedians.some(comedian => 
+                              comedian.name.toLowerCase().includes(query)
+                        ))
                   );
             }
 
             setFilteredShows(filtered);
       };
 
+      console.log(filteredShows, "filteredShows");
+
       const debouncedSearch = debounce((query) => {
             setSearchQuery(query);
       }, 300);
 
-      const handleEventPress = (event) => {
-            navigation.navigate('EventDetails', { event });
+      const handleViewTickets = (show) => {
+            // Navigate to tickets screen with static data for now
+            navigation.navigate('TicketsScreen', { 
+                  show,
+                  show_date_id: show.date_id,
+                  show_id: show.id,
+                  tickets: [
+                        {
+                              id: 1,
+                              ticket_number: 'TKT-001',
+                              customer_name: 'John Doe',
+                              seat_number: 'A1',
+                              status: 'valid',
+                              purchase_date: '2025-01-15',
+                              price: '$25.00'
+                        },
+                        {
+                              id: 2,
+                              ticket_number: 'TKT-002',
+                              customer_name: 'Jane Smith',
+                              seat_number: 'A2',
+                              status: 'valid',
+                              purchase_date: '2025-01-15',
+                              price: '$25.00'
+                        },
+                        {
+                              id: 3,
+                              ticket_number: 'TKT-003',
+                              customer_name: 'Mike Johnson',
+                              seat_number: 'B1',
+                              status: 'scanned',
+                              purchase_date: '2025-01-14',
+                              price: '$25.00'
+                        },
+                        {
+                              id: 4,
+                              ticket_number: 'TKT-004',
+                              customer_name: 'Sarah Wilson',
+                              seat_number: 'B2',
+                              status: 'valid',
+                              purchase_date: '2025-01-16',
+                              price: '$25.00'
+                        },
+                        {
+                              id: 5,
+                              ticket_number: 'TKT-005',
+                              customer_name: 'David Brown',
+                              seat_number: 'C1',
+                              status: 'valid',
+                              purchase_date: '2025-01-13',
+                              price: '$25.00'
+                        }
+                  ]
+            });
       };
 
-      const handleScanPress = (event) => {
-            navigation.navigate('QRScanner', { event });
-      };
-
-      const FilterButton = ({ filter }) => (
-            <TouchableOpacity
-                  style={[
-                        styles.filterButton,
-                        selectedFilter === filter.key && styles.filterButtonActive
-                  ]}
-                  onPress={() => setSelectedFilter(filter.key)}
-            >
-                  <Text style={styles.filterIcon}>{filter.icon}</Text>
-                  <Text style={[
-                        styles.filterText,
-                        selectedFilter === filter.key && styles.filterTextActive
-                  ]}>
-                        {filter.label}
-                  </Text>
-            </TouchableOpacity>
-      );
-
-      const renderEvent = ({ item }) => (
-            <EventCard
-                  event={item}
-                  onPress={() => handleEventPress(item)}
-                  onScanPress={handleScanPress}
+      const renderShow = ({ item }) => (
+            <ShowCard
+                  show={item}
+                  onViewTickets={() => handleViewTickets(item)}
             />
       );
 
@@ -151,7 +170,7 @@ const ShowsScreen = ({ navigation }) => {
       return (
             <SafeAreaView style={styles.container}>
                   <View style={styles.header}>
-                              <Text style={styles.headerTitle}>🎭 Shows</Text>
+                        <Text style={styles.headerTitle}>🎭 Shows</Text>
                         <Text style={styles.headerSubtitle}>
                               {filteredShows.length} show{filteredShows.length !== 1 ? 's' : ''} found
                         </Text>
@@ -160,30 +179,19 @@ const ShowsScreen = ({ navigation }) => {
                   {/* Search Bar */}
                   <View style={styles.searchContainer}>
                         <Input
-                              placeholder="Search shows..."
+                              placeholder="Search shows, comedians..."
                               onChangeText={debouncedSearch}
                               leftIcon={<Text style={styles.searchIcon}>🔍</Text>}
                               style={styles.searchInput}
                         />
                   </View>
+  
 
-                  {/* Filter Buttons */}
-                  <View style={styles.filtersContainer}>
-                        <FlatList
-                              data={filters}
-                              horizontal
-                              showsHorizontalScrollIndicator={false}
-                              renderItem={({ item }) => <FilterButton filter={item} />}
-                              keyExtractor={(item) => item.key}
-                              contentContainerStyle={styles.filtersContent}
-                        />
-                  </View>
-
-                  {/* Events List */}
+                  {/* Shows List */}
                   <FlatList
                         data={filteredShows}
-                        renderItem={renderEvent}
-                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={renderShow}
+                        keyExtractor={(_) => Math.random().toString(36).substring(2, 15)}
                         refreshControl={
                               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                         }

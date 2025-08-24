@@ -158,8 +158,8 @@ export const showAPI = {
       getTicketsByShow: async (show_id, show_date_id) => {
             try {
                   return await apiService.post(`${API_CONFIG.ENDPOINTS.SHOW_TICKETS}`, {
-                        show_id: 2,
-                        show_date_id: 2,
+                        show_id,
+                        show_date_id,
                   }, {
                         includeAuth: true,
                   });

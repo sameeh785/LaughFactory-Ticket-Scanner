@@ -68,8 +68,6 @@ const ShowsScreen = ({ navigation }) => {
             setFilteredShows(filtered);
       };
 
-      console.log(filteredShows, "filteredShows");
-
       const debouncedSearch = debounce((query) => {
             setSearchQuery(query);
       }, 300);

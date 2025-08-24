@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, commonStyles } from '../utils/helpers';
 import { showAPI } from '../services/apiEndpoints';
 import LoadingSpinner from '../components/LoadingSpinner';
+import apiService from '../services/apiService';
 
 const TicketsScreen = ({ route, navigation }) => {
       const { show, show_id, show_date_id } = route.params || {};
@@ -143,82 +144,12 @@ const TicketsScreen = ({ route, navigation }) => {
 
       const fetchTickets = async () => {
             try {
-                  // For now, using mock data from your API response
-                  // Replace this with actual API call when ready
-                  const mockTickets = [
-                        {
-                              "ticket_id": 13,
-                              "ticket_code": "557bfabd-7e89-442a-94e9-4e81b46eb217",
-                              "is_scanned": false,
-                              "scanned_at": null,
-                              "attendee": "John Smith"
-                        },
-                        {
-                              "ticket_id": 14,
-                              "ticket_code": "ded00f7d-63d6-4b87-bf4e-8b10fda2a0f6",
-                              "is_scanned": false,
-                              "scanned_at": null,
-                              "attendee": "Sarah Johnson"
-                        },
-                        {
-                              "ticket_id": 15,
-                              "ticket_code": "065b7d6d-ed02-4ae7-9b3f-eb1a18ed5c73",
-                              "is_scanned": true,
-                              "scanned_at": "2024-01-15T10:30:00Z",
-                              "attendee": "Mike Davis"
-                        },
-                        {
-                              "ticket_id": 16,
-                              "ticket_code": "278054ec-fc06-4b3f-ab7c-e50f5930059e",
-                              "is_scanned": false,
-                              "scanned_at": null,
-                              "attendee": "Emily Wilson"
-                        },
-                        {
-                              "ticket_id": 17,
-                              "ticket_code": "e89dd17a-2c41-4dcc-b8d1-6a1681f8470d",
-                              "is_scanned": true,
-                              "scanned_at": "2024-01-15T11:15:00Z",
-                              "attendee": "David Brown"
-                        },
-                        {
-                              "ticket_id": 18,
-                              "ticket_code": "6550dd72-1d50-455a-8699-f8a316f87797",
-                              "is_scanned": false,
-                              "scanned_at": null,
-                              "attendee": "Lisa Anderson"
-                        },
-                        {
-                              "ticket_id": 19,
-                              "ticket_code": "960d5257-e6bd-4770-9ab9-8f9bd2ae3109",
-                              "is_scanned": false,
-                              "scanned_at": null,
-                              "attendee": "Robert Taylor"
-                        },
-                        {
-                              "ticket_id": 20,
-                              "ticket_code": "d3af71d4-080d-4dc9-861c-1a45801b67f5",
-                              "is_scanned": false,
-                              "scanned_at": null,
-                              "attendee": "Jennifer Lee"
-                        },
-                        {
-                              "ticket_id": 21,
-                              "ticket_code": "402e1cf8-0483-4f0f-b8c0-92785291aaae",
-                              "is_scanned": true,
-                              "scanned_at": "2024-01-15T09:45:00Z",
-                              "attendee": "Michael Chen"
-                        },
-                        {
-                              "ticket_id": 22,
-                              "ticket_code": "db6ad52f-32a7-46f9-b413-7afa3e7c856b",
-                              "is_scanned": false,
-                              "scanned_at": null,
-                              "attendee": "Amanda Garcia"
-                        }
-                  ];
-                  setTickets(mockTickets);
-                  setFilteredTickets(mockTickets);
+                  const response = await showAPI.getTicketsByShow(show_id, show_date_id);
+                  console.log(response, "response");
+                  if(response?.data?.data){
+                        setTickets(response.data.data);
+                        setFilteredTickets(response.data.data);
+                  }
             } catch (error) {
                   console.error('Error fetching tickets:', error);
             } finally {

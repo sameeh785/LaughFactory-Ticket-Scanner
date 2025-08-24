@@ -226,7 +226,7 @@ const AppNavigation = () => {
       const { isAuthenticated, loading } = useAuth();
 
       if (loading) {
-            return <LoadingSpinner text="Loading..." />;
+            return <LoadingSpinner />;
       }
 
       return (

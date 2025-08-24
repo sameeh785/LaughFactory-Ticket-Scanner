@@ -93,7 +93,15 @@ class ApiService {
 
                   const response = await fetch(url, config);
                   clearTimeout(timeoutId);
-
+                   // if error is 401, remove auth token and redirect to login screen
+                   if (response.status === 401) {
+                        await this.removeAuthToken();
+                        return {
+                              success: false,
+                              error: 'Unauthorized',
+                              status: 401,
+                        };
+                  }
                   const responseData = await response.json();
 
                   if (!response.ok) {
@@ -105,8 +113,7 @@ class ApiService {
                         data: responseData,
                         status: response.status,
                   };
-            } catch (error) {
-                  console.error('API Request Error:', error);
+            } catch (error) {   
                   return {
                         success: false,
                         error: error.message || 'Network request failed',

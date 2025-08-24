@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
       View,
       Text,
@@ -15,16 +15,15 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { colors, commonStyles, isValidQRCode } from '../utils/helpers';
 
 const QRScannerScreen = ({ navigation, route }) => {
-      const { show, ticket, mode } = route.params;
-                 console.log(route.params, "route.params");
-      console.log(show, "show");
-      console.log(ticket, "ticket");
-      console.log(mode, "mode");
+      const { show } = route.params;
       const [hasPermission, setHasPermission] = useState(null);
       const [scanned, setScanned] = useState(false);
       const [scanning, setScanning] = useState(false);
       const [flashOn, setFlashOn] = useState(false);
-      const [lastScanTime, setLastScanTime] = useState(0);
+      
+      // Use refs for immediate state tracking
+      const isScanningRef = useRef(false);
+      const lastScanTimeRef = useRef(0);
 
       useEffect(() => {
             getCameraPermissions();
@@ -38,12 +37,16 @@ const QRScannerScreen = ({ navigation, route }) => {
       const handleBarCodeScanned = async ({ type, data }) => {
             const now = Date.now();
 
-            // Prevent rapid scanning of the same code 5 seconds
-            if (now - lastScanTime < 5000) {
+            // Prevent rapid scanning using refs for immediate check
+            if (isScanningRef.current || (now - lastScanTimeRef.current < 5000)) {
                   return;
             }
 
-            setLastScanTime(now);
+            // Immediately set refs to prevent multiple scans
+            isScanningRef.current = true;
+            lastScanTimeRef.current = now;
+            
+            // Update state for UI
             setScanned(true);
             setScanning(true);
 
@@ -60,6 +63,7 @@ const QRScannerScreen = ({ navigation, route }) => {
                                     {
                                           text: 'Scan Again',
                                           onPress: () => {
+                                                isScanningRef.current = false;
                                                 setScanned(false);
                                                 setScanning(false);
                                           }
@@ -70,35 +74,26 @@ const QRScannerScreen = ({ navigation, route }) => {
                   }
 
                   // Call scan API
-                  const response = await scanAPI.scanTicket(data, show.id);
+                  const response = await scanAPI.scanTicket(show.id, show.date_id, data);
 
                   if (response.success) {
                         const ticketData = response.data;
-
-                        // Show success alert
                         Alert.alert(
-                              '✅ Ticket Verified',
-                              `Ticket scanned successfully!\n\n` +
-                              `Holder: ${ticketData.holderName}\n` +
-                              `Type: ${ticketData.ticketType}\n` +
-                              `Seat: ${ticketData.seatNumber}\n\n` +
-                              `${ticketData.message}`,
+                              'Ticket Verified',
+                              'Ticket scanned successfully!',
                               [
-                                    {
-                                          text: 'Scan Next',
-                                          onPress: () => {
-                                                setScanned(false);
-                                                setScanning(false);
-                                          }
-                                    },
-                                    {
-                                          text: 'Done',
-                                          onPress: () => navigation.goBack(),
-                                          style: 'cancel'
-                                    }
+                                    { text: 'Close', onPress: () => navigation.navigate('TicketsScreen', { show: show}) },
+                                    { text: 'Scan Again', onPress: () => {
+                                          isScanningRef.current = false;
+                                          isScanningRef.scanningFailed = false;
+                                          setScanned(false);
+                                          setScanning(false);
+                                    } }
                               ]
-                        );
+                        );;
+                       
                   } else {
+                        isScanningRef.scanningFailed = true;
                         // Show error alert
                         Alert.alert(
                               '❌ Scan Failed',
@@ -107,6 +102,8 @@ const QRScannerScreen = ({ navigation, route }) => {
                                     {
                                           text: 'Try Again',
                                           onPress: () => {
+                                                isScanningRef.current = false;
+                                                isScanningRef.scanningFailed = false;
                                                 setScanned(false);
                                                 setScanning(false);
                                           }
@@ -120,7 +117,7 @@ const QRScannerScreen = ({ navigation, route }) => {
                         );
                   }
             } catch (error) {
-                  console.error('Scan error:', error);
+                  isScanningRef.scanningFailed = true;
                   Alert.alert(
                         'Error',
                         'An error occurred while scanning. Please try again.',
@@ -128,6 +125,8 @@ const QRScannerScreen = ({ navigation, route }) => {
                               {
                                     text: 'Retry',
                                     onPress: () => {
+                                          isScanningRef.current = false;
+                                          isScanningRef.scanningFailed = false;
                                           setScanned(false);
                                           setScanning(false);
                                     }
@@ -135,6 +134,7 @@ const QRScannerScreen = ({ navigation, route }) => {
                         ]
                   );
             } finally {
+                  isScanningRef.current = false;
                   setScanning(false);
             }
       };
@@ -144,6 +144,7 @@ const QRScannerScreen = ({ navigation, route }) => {
       };
 
       const resetScanner = () => {
+            isScanningRef.current = false;
             setScanned(false);
             setScanning(false);
       };
@@ -151,7 +152,7 @@ const QRScannerScreen = ({ navigation, route }) => {
       if (hasPermission === null) {
             return (
                   <SafeAreaView style={styles.container}>
-                        <LoadingSpinner text="Requesting camera permission..." />
+                        <LoadingSpinner />
                   </SafeAreaView>
             );
       }
@@ -235,9 +236,9 @@ const QRScannerScreen = ({ navigation, route }) => {
                   </View>
 
                   {/* Instructions */}
-                  <View style={styles.instructionsContainer}>
+                  {/* <View style={styles.instructionsContainer}>
                         <Text style={styles.instructionsTitle}>
-                              {scanned ? 'Processing...' : 'Scan QR Code'}
+                              {isScanningRef.scanningFailed ? 'Scan Failed' : scanned ? 'Processing...' : 'Scan QR Code'}
                         </Text>
                         <Text style={styles.instructionsText}>
                               {scanned
@@ -245,36 +246,7 @@ const QRScannerScreen = ({ navigation, route }) => {
                                     : 'Point your camera at the QR code on the ticket'
                               }
                         </Text>
-
-                        {scanned && !scanning && (
-                              <Button
-                                    title="Scan Again"
-                                    onPress={resetScanner}
-                                    variant="outline"
-                                    style={styles.scanAgainButton}
-                              />
-                        )}
-                  </View>
-
-                  {/* Stats Footer */}
-                  <View style={styles.statsFooter}>
-                        <View style={styles.statItem}>
-                              <Text style={styles.statValue}>2</Text>
-                              <Text style={styles.statLabel}>Scanned</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.statItem}>
-                              <Text style={styles.statValue}>2</Text>
-                              <Text style={styles.statLabel}>Total</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.statItem}>
-                              <Text style={styles.statValue}>
-                                    0%
-                              </Text>
-                              <Text style={styles.statLabel}>Progress</Text>
-                        </View>
-                  </View>
+                  </View> */}
             </SafeAreaView>
       );
 };

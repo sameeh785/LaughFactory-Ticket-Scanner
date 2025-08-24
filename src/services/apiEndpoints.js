@@ -161,7 +161,7 @@ export const showAPI = {
                         show_id,
                         show_date_id,
                   }, {
-                        includeAuth: true,
+                        includeAuth: false,
                   });
             } catch (error) {
                   return {
@@ -185,8 +185,6 @@ export const scanAPI = {
        */
       scanTicket: async (show_id, show_date_id, ticket_code) => {
             try {
-
-
                   return await apiService.post(API_CONFIG.ENDPOINTS.SCAN_TICKET, {
                         show_id,
                         show_date_id,

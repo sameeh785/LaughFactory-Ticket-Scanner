@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
       View,
       ActivityIndicator,
       StyleSheet,
-      Text,
+      Animated,
 } from 'react-native';
 import { colors, commonStyles } from '../utils/helpers';
 
@@ -11,27 +11,52 @@ import { colors, commonStyles } from '../utils/helpers';
  * Loading Spinner Component
  * @param {string} size - Spinner size ('small', 'large')
  * @param {string} color - Spinner color
- * @param {string} text - Loading text
  * @param {boolean} overlay - Show as overlay
  * @param {object} style - Additional styles
  */
 const LoadingSpinner = ({
       size = 'large',
       color = colors.primary,
-      text = 'Loading...',
       overlay = false,
       style,
 }) => {
+      const rotateAnim = useRef(new Animated.Value(0)).current;
+
+      useEffect(() => {
+            const startRotation = () => {
+                  Animated.loop(
+                        Animated.timing(rotateAnim, {
+                              toValue: 1,
+                              duration: 2000,
+                              useNativeDriver: true,
+                        })
+                  ).start();
+            };
+
+            startRotation();
+      }, [rotateAnim]);
+
+      const spin = rotateAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', '360deg'],
+      });
+
       const containerStyle = overlay
             ? [styles.overlay, style]
             : [styles.container, style];
 
       return (
             <View style={containerStyle}>
-                  <ActivityIndicator size={size} color={color} />
-                  {text && (
-                        <Text style={styles.loadingText}>{text}</Text>
-                  )}
+                  <View style={styles.logoContainer}>
+                        <Animated.Text 
+                              style={[
+                                    styles.logoText,
+                                    { transform: [{ rotate: spin }] }
+                              ]}
+                        >
+                              🎭
+                        </Animated.Text>
+                  </View>
             </View>
       );
 };
@@ -47,10 +72,12 @@ const styles = StyleSheet.create({
             ...commonStyles.centerContent,
             zIndex: 1000,
       },
-      loadingText: {
+      logoContainer: {
             marginTop: 12,
-            fontSize: 16,
-            color: colors.text,
+            alignItems: 'center',
+      },
+      logoText: {
+            fontSize: 48,
             textAlign: 'center',
       },
 });

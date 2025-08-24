@@ -76,55 +76,6 @@ const ShowsScreen = ({ navigation }) => {
             // Navigate to tickets screen with static data for now
             navigation.navigate('TicketsScreen', { 
                   show,
-                  show_date_id: show.date_id,
-                  show_id: show.id,
-                  tickets: [
-                        {
-                              id: 1,
-                              ticket_number: 'TKT-001',
-                              customer_name: 'John Doe',
-                              seat_number: 'A1',
-                              status: 'valid',
-                              purchase_date: '2025-01-15',
-                              price: '$25.00'
-                        },
-                        {
-                              id: 2,
-                              ticket_number: 'TKT-002',
-                              customer_name: 'Jane Smith',
-                              seat_number: 'A2',
-                              status: 'valid',
-                              purchase_date: '2025-01-15',
-                              price: '$25.00'
-                        },
-                        {
-                              id: 3,
-                              ticket_number: 'TKT-003',
-                              customer_name: 'Mike Johnson',
-                              seat_number: 'B1',
-                              status: 'scanned',
-                              purchase_date: '2025-01-14',
-                              price: '$25.00'
-                        },
-                        {
-                              id: 4,
-                              ticket_number: 'TKT-004',
-                              customer_name: 'Sarah Wilson',
-                              seat_number: 'B2',
-                              status: 'valid',
-                              purchase_date: '2025-01-16',
-                              price: '$25.00'
-                        },
-                        {
-                              id: 5,
-                              ticket_number: 'TKT-005',
-                              customer_name: 'David Brown',
-                              seat_number: 'C1',
-                              status: 'valid',
-                              purchase_date: '2025-01-13',
-                              price: '$25.00'
-                        }
-                  ]
             });
       };
 
@@ -162,7 +113,7 @@ const ShowsScreen = ({ navigation }) => {
       );
 
       if (loading) {
-            return <LoadingSpinner text="Loading shows..." />;
+            return <LoadingSpinner />;
       }
 
       return (

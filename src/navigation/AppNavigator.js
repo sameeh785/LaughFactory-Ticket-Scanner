@@ -91,6 +91,7 @@ const AppStack = () => {
                         component={QRScannerScreen}
                         options={{
                               presentation: 'modal',
+                              animation: 'slide_from_bottom',
                         }}
                   />
                   <Stack.Screen
@@ -109,7 +110,7 @@ const RootNavigator = () => {
       const { isAuthenticated, loading } = useAuth();
 
       if (loading) {
-            return <LoadingSpinner text="Loading app..." />;
+            return <LoadingSpinner />;
       }
 
       return (

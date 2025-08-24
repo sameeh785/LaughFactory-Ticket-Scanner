@@ -12,14 +12,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, commonStyles } from '../utils/helpers';
 import { showAPI } from '../services/apiEndpoints';
 import LoadingSpinner from '../components/LoadingSpinner';
-import apiService from '../services/apiService';
+import { useIsFocused } from '@react-navigation/native';
 
 const TicketsScreen = ({ route, navigation }) => {
-      const { show, show_id, show_date_id } = route.params || {};
+      const { show } = route.params || {};
       const [tickets, setTickets] = useState([]);
       const [filteredTickets, setFilteredTickets] = useState([]);
       const [searchQuery, setSearchQuery] = useState('');
       const [loading, setLoading] = useState(true);
+      const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'pending', 'scanned'
+      const isFocused = useIsFocused();
+
       const getStatusColor = (isScanned) => {
             return isScanned ? colors.success : colors.warning;
       };
@@ -32,15 +35,55 @@ const TicketsScreen = ({ route, navigation }) => {
             return isScanned ? 'SCANNED' : 'PENDING';
       };
 
+      // Filter tickets by status
+      const filterTicketsByStatus = (status) => {
+            setActiveFilter(status);
+            let filtered = tickets;
+            
+            if (status === 'pending') {
+                  filtered = tickets.filter(ticket => !ticket.is_scanned);
+            } else if (status === 'scanned') {
+                  filtered = tickets.filter(ticket => ticket.is_scanned);
+            }
+            
+            // Apply search filter if there's a search query
+            if (searchQuery.trim()) {
+                  filtered = filtered.filter(ticket => 
+                        ticket.attendee.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        ticket.ticket_id.toString().includes(searchQuery) ||
+                        ticket.ticket_code.toLowerCase().includes(searchQuery.toLowerCase())
+                  );
+            }
+            
+            setFilteredTickets(filtered);
+      };
+
       // Search functionality
       const handleSearch = (query) => {
             setSearchQuery(query);
             if (!query.trim()) {
-                  setFilteredTickets(tickets);
+                  // If no search query, apply only status filter
+                  if (activeFilter === 'pending') {
+                        setFilteredTickets(tickets.filter(ticket => !ticket.is_scanned));
+                  } else if (activeFilter === 'scanned') {
+                        setFilteredTickets(tickets.filter(ticket => ticket.is_scanned));
+                  } else {
+                        setFilteredTickets(tickets);
+                  }
                   return;
             }
             
-            const filtered = tickets.filter(ticket => 
+            let filtered = tickets;
+            
+            // Apply status filter first
+            if (activeFilter === 'pending') {
+                  filtered = tickets.filter(ticket => !ticket.is_scanned);
+            } else if (activeFilter === 'scanned') {
+                  filtered = tickets.filter(ticket => ticket.is_scanned);
+            }
+            
+            // Then apply search filter
+            filtered = filtered.filter(ticket => 
                   ticket.attendee.toLowerCase().includes(query.toLowerCase()) ||
                   ticket.ticket_id.toString().includes(query) ||
                   ticket.ticket_code.toLowerCase().includes(query.toLowerCase())
@@ -50,7 +93,8 @@ const TicketsScreen = ({ route, navigation }) => {
 
       const clearSearch = () => {
             setSearchQuery('');
-            setFilteredTickets(tickets);
+            // Reapply status filter
+            filterTicketsByStatus(activeFilter);
       };
 
 
@@ -144,10 +188,10 @@ const TicketsScreen = ({ route, navigation }) => {
 
       const fetchTickets = async () => {
             try {
-                  const response = await showAPI.getTicketsByShow(show_id, show_date_id);
-                  console.log(response, "response");
+                 const response = await showAPI.getTicketsByShow(show.id, show.date_id);
                   if(response?.data?.data){
                         setTickets(response.data.data);
+                        // Initialize with all tickets (default filter)
                         setFilteredTickets(response.data.data);
                   }
             } catch (error) {
@@ -158,10 +202,10 @@ const TicketsScreen = ({ route, navigation }) => {
       };
       useEffect(() => {
             fetchTickets();
-      }, []);
+      }, [isFocused]);
 
       if (loading) {
-            return <LoadingSpinner text="Loading tickets..." />;
+            return <LoadingSpinner />;
       }
       return (
             <SafeAreaView style={styles.container}>
@@ -202,6 +246,62 @@ const TicketsScreen = ({ route, navigation }) => {
                                           <Text style={styles.clearButtonText}>✕</Text>
                                     </TouchableOpacity>
                               )}
+                        </View>
+                  </View>
+
+                  {/* Filter Buttons */}
+                  <View style={styles.filtersContainer}>
+                        <View style={styles.filtersContent}>
+                              <TouchableOpacity
+                                    style={[
+                                          styles.filterButton,
+                                          activeFilter === 'all' && styles.filterButtonActive
+                                    ]}
+                                    onPress={() => filterTicketsByStatus('all')}
+                              >
+                                    <Text style={[
+                                          styles.filterIcon,
+                                          activeFilter === 'all' && styles.filterTextActive
+                                    ]}>📋</Text>
+                                    <Text style={[
+                                          styles.filterText,
+                                          activeFilter === 'all' && styles.filterTextActive
+                                    ]}>All</Text>
+                              </TouchableOpacity>
+
+                              <TouchableOpacity
+                                    style={[
+                                          styles.filterButton,
+                                          activeFilter === 'pending' && styles.filterButtonActive
+                                    ]}
+                                    onPress={() => filterTicketsByStatus('pending')}
+                              >
+                                    <Text style={[
+                                          styles.filterIcon,
+                                          activeFilter === 'pending' && styles.filterTextActive
+                                    ]}>⏳</Text>
+                                    <Text style={[
+                                          styles.filterText,
+                                          activeFilter === 'pending' && styles.filterTextActive
+                                    ]}>Pending</Text>
+                              </TouchableOpacity>
+
+                              <TouchableOpacity
+                                    style={[
+                                          styles.filterButton,
+                                          activeFilter === 'scanned' && styles.filterButtonActive
+                                    ]}
+                                    onPress={() => filterTicketsByStatus('scanned')}
+                              >
+                                    <Text style={[
+                                          styles.filterIcon,
+                                          activeFilter === 'scanned' && styles.filterTextActive
+                                    ]}>✅</Text>
+                                    <Text style={[
+                                          styles.filterText,
+                                          activeFilter === 'scanned' && styles.filterTextActive
+                                    ]}>Scanned</Text>
+                              </TouchableOpacity>
                         </View>
                   </View>
 
@@ -300,17 +400,20 @@ const styles = StyleSheet.create({
       },
       filtersContent: {
             paddingHorizontal: 20,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
       },
       filterButton: {
             flexDirection: 'row',
             alignItems: 'center',
             paddingHorizontal: 16,
             paddingVertical: 8,
-            marginRight: 12,
             borderRadius: 20,
             backgroundColor: colors.surface,
             borderWidth: 1,
             borderColor: colors.border,
+            flex: 1,
+            marginHorizontal: 4,
       },
       filterButtonActive: {
             backgroundColor: colors.primary,

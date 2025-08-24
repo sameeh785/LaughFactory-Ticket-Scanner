@@ -79,7 +79,7 @@ const DashboardScreen = ({ navigation }) => {
       );
 
       if (loading) {
-            return <LoadingSpinner text="Loading dashboard..." />;
+            return <LoadingSpinner />;
       }
 
       return (

@@ -156,7 +156,7 @@ const ProfileScreen = ({ navigation }) => {
       );
 
       if (loading) {
-            return <LoadingSpinner text="Loading profile..." />;
+            return <LoadingSpinner />;
       }
 
       return (

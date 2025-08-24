@@ -93,7 +93,7 @@ const LoginScreen = ({ navigation }) => {
       };
 
       if (isLoading) {
-            return <LoadingSpinner overlay text="Signing in..." />;
+            return <LoadingSpinner overlay />;
       }
 
       return (

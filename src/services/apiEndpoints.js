@@ -161,7 +161,7 @@ export const showAPI = {
                         show_id,
                         show_date_id,
                   }, {
-                        includeAuth: false,
+                        includeAuth: true,
                   });
             } catch (error) {
                   return {

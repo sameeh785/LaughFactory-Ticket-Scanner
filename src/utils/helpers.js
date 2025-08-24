@@ -1,5 +1,5 @@
 import { Dimensions, Platform } from 'react-native';
-
+import Toast from 'react-native-toast-message';
 /**
  * Screen dimensions utility
  */
@@ -109,8 +109,10 @@ export const calculatePercentage = (value, total) => {
  * @param {string} type - Toast type ('success', 'error', 'info')
  */
 export const showToast = (message, type = 'info') => {
-      // This would be implemented with a toast library like react-native-toast-message
-      console.log(`Toast [${type}]: ${message}`);
+      Toast.show({
+            type: type,
+            text1: message,
+      });
 };
 
 /**
@@ -119,7 +121,6 @@ export const showToast = (message, type = 'info') => {
  */
 export const handleApiError = (error) => {
       let message = 'Something went wrong. Please try again.';
-
       if (error.error) {
             message = error.error;
       } else if (error.message) {

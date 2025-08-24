@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authAPI } from '../services/apiEndpoints';
 import apiService from '../services/apiService';
+import { handleApiError, showToast } from '../utils/helpers';
 
 // Initial state
 const initialState = {
@@ -77,6 +78,8 @@ export const AuthProvider = ({ children }) => {
       // Check if user is already logged in when app starts
       useEffect(() => {
             checkAuthStatus();
+            // Set up unauthorized callback
+            apiService.setUnauthorizedCallback(handleUnauthorized);
       }, []);
 
       const checkAuthStatus = async () => {
@@ -141,13 +144,20 @@ export const AuthProvider = ({ children }) => {
             try {
                   await authAPI.logout();
                   dispatch({ type: ActionTypes.LOGOUT });
+                  await apiService.removeAuthToken();
                   return { success: true };
             } catch (error) {
                   console.error('Logout error:', error);
                   // Even if logout API fails, clear local state
                   dispatch({ type: ActionTypes.LOGOUT });
+                  await apiService.removeAuthToken();
                   return { success: true };
             }
+      };
+
+      const handleUnauthorized = async () => {
+            showToast("Session expired. Please login again.");
+            await logout();
       };
 
       const updateUser = (userData) => {
@@ -187,6 +197,7 @@ export const AuthProvider = ({ children }) => {
             clearError,
             forgotPassword,
             updatePassword,
+            handleUnauthorized,
       };
 
       return (

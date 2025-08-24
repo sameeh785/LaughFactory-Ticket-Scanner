@@ -11,7 +11,8 @@ class ApiService {
             this.timeout = API_CONFIG.TIMEOUT;
             this.defaultHeaders = API_CONFIG.DEFAULT_HEADERS;
             this.username = API_CONFIG.BASIC_AUTH_USERNAME;
-            this.password = API_CONFIG.BASIC_AUTH_PASSWORD;      
+            this.password = API_CONFIG.BASIC_AUTH_PASSWORD;
+            this.onUnauthorized = null; // Callback for 401 errors
       }
 
       /**
@@ -46,6 +47,13 @@ class ApiService {
             } catch (error) {
                   console.error('Error removing auth token:', error);
             }
+      }
+
+      /**
+       * Set callback for unauthorized (401) errors
+       */
+      setUnauthorizedCallback(callback) {
+            this.onUnauthorized = callback;
       }
 
       /**
@@ -93,9 +101,13 @@ class ApiService {
 
                   const response = await fetch(url, config);
                   clearTimeout(timeoutId);
-                   // if error is 401, remove auth token and redirect to login screen
+                   // if error is 401, remove auth token and call unauthorized callback
                    if (response.status === 401) {
                         await this.removeAuthToken();
+                        // Call the unauthorized callback if set
+                        if (this.onUnauthorized) {
+                              this.onUnauthorized();
+                        }
                         return {
                               success: false,
                               error: 'Unauthorized',

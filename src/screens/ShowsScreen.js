@@ -72,17 +72,18 @@ const ShowsScreen = ({ navigation }) => {
             setSearchQuery(query);
       }, 300);
 
-      const handleViewTickets = (show) => {
+      const handleScanTickets = (show) => {
             // Navigate to tickets screen with static data for now
-            navigation.navigate('TicketsScreen', { 
-                  show,
+            navigation.navigate('QRScanner', { 
+                  show, 
+                  mode: 'scan_ticket'
             });
       };
 
       const renderShow = ({ item }) => (
             <ShowCard
                   show={item}
-                  onViewTickets={() => handleViewTickets(item)}
+                  onScanTickets={() => handleScanTickets(item)}
             />
       );
 

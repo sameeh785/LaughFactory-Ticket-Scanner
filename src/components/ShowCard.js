@@ -17,7 +17,7 @@ import { colors, commonStyles } from '../utils/helpers';
 const ShowCard = ({
       show,
       onPress,
-      onViewTickets,
+      onScanTickets,
 }) => {
       // Format date for display
       const formatDate = (dateString) => {
@@ -110,9 +110,9 @@ const ShowCard = ({
                         {/* View Tickets Button */}
                         <TouchableOpacity
                               style={styles.viewTicketsButton}
-                              onPress={() => onViewTickets?.(show)}
+                              onPress={() => onScanTickets?.(show)}
                         >
-                              <Text style={styles.viewTicketsButtonText}>🎫 View Tickets</Text>
+                              <Text style={styles.viewTicketsButtonText}>🎫 Scan Tickets</Text>
                         </TouchableOpacity>
                   </View>
             </TouchableOpacity>

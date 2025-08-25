@@ -59,12 +59,8 @@ class ApiService {
       /**
        * Get headers with authentication
        */
-      async getHeaders(includeAuth = true, isLoginScreen = false) {
+      async getHeaders(includeAuth = true) {
             const headers = { ...this.defaultHeaders };
-            if(isLoginScreen){
-                  const credentials = btoa(`${this.username}:${this.password}`);
-                  headers.Authorization = `Basic ${credentials}`;
-            }
             if (includeAuth) {
 
                   const token = await this.getAuthToken();
@@ -81,8 +77,8 @@ class ApiService {
        */
       async request(url, options = {}) {
             try {
-                  const { method = 'GET', body, includeAuth = true,isLoginScreen = false, ...otherOptions } = options;
-                  const headers = await this.getHeaders(includeAuth,isLoginScreen);
+                  const { method = 'GET', body, includeAuth = true, ...otherOptions } = options;
+                  const headers = await this.getHeaders(includeAuth);
 
                   const config = {
                         method,

@@ -43,6 +43,11 @@
           "cameraPermission": "Allow LaughFactory Ticket Scanning to access your camera to scan QR codes on tickets."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "74067dbf-9ed8-45da-9dfb-9a333573fbc3"
+      }
+    }
   }
 }

@@ -156,7 +156,7 @@ export const AuthProvider = ({ children }) => {
       };
 
       const handleUnauthorized = async () => {
-            showToast("Session expired. Please login again.");
+            showToast("Unauthorized", "error");
             await logout();
       };
 

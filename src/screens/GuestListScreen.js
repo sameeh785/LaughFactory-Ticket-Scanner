@@ -4,17 +4,14 @@ import {
       Text,
       StyleSheet,
       FlatList,
-      TouchableOpacity,
       RefreshControl,
-      Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors, commonStyles } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
-import apiService from '../services/apiService';
+import { showAPI } from '../services/apiEndpoints';
 
 const GuestListScreen = () => {
-      const navigation = useNavigation();
       const route = useRoute();
       const { show } = route.params || {};
       
@@ -36,29 +33,12 @@ const GuestListScreen = () => {
 
       const fetchGuestList = async () => {
             try {
-                  setLoading(true);
-                  // TODO: Replace with actual API endpoint
-                  const response = await apiService.get(`/shows/${show.id}/guests`);
-                  setGuests(response.data || []);
+                  const response = await showAPI.getGuestListByShow(show);
+                  const payload = response?.data?.data ?? response?.data ?? [];
+                  const normalized = Array.isArray(payload) ? payload : (payload ? [payload] : []);
+                  setGuests(normalized);
             } catch (error) {
                   console.error('Error fetching guest list:', error);
-                  // For development, show mock data instead of error
-                  setGuests([
-                        {
-                              id: 1,
-                              name: 'John Doe',
-                              email: 'john@example.com',
-                              phone: '+1 (555) 123-4567',
-                              status: 'confirmed'
-                        },
-                        {
-                              id: 2,
-                              name: 'Jane Smith',
-                              email: 'jane@example.com',
-                              phone: '+1 (555) 987-6543',
-                              status: 'pending'
-                        }
-                  ]);
             } finally {
                   setLoading(false);
             }
@@ -71,24 +51,28 @@ const GuestListScreen = () => {
       };
 
       useEffect(() => {
-            // fetchGuestList();
+            fetchGuestList();
       }, [show.id]);
 
       const renderGuestItem = ({ item, index }) => (
             <View style={styles.guestItem}>
                   <View style={styles.guestInfo}>
-                        <Text style={styles.guestName}>{item.name}</Text>
-                        <Text style={styles.guestEmail}>{item.email}</Text>
-                        {item.phone && (
-                              <Text style={styles.guestPhone}>{item.phone}</Text>
-                        )}
+                        <Text style={styles.guestName}>{item.vip_guest || 'Unnamed Guest'}</Text>
+                        {item.ticket_code ? (
+                              <Text style={styles.guestEmail}>Ticket: {item.ticket_code}</Text>
+                        ) : null}
+                        <Text style={styles.guestPhone}>
+                              {item.is_scanned
+                                    ? (item.scanned_at ? `Scanned at: ${new Date(item.scanned_at).toLocaleString()}` : 'Scanned')
+                                    : 'Scan pending'}
+                        </Text>
                   </View>
                   <View style={styles.guestStatus}>
                         <Text style={[
                               styles.statusText,
-                              { color: item.status === 'confirmed' ? colors.success : colors.warning }
+                              { color: item.is_scanned ? colors.success : colors.warning }
                         ]}>
-                              {item.status === 'confirmed' ? '✅ Confirmed' : '⏳ Pending'}
+                              {item.is_scanned ? '✅ Scanned' : '⏳ Not Scanned'}
                         </Text>
                   </View>
             </View>
@@ -111,7 +95,7 @@ const GuestListScreen = () => {
                   <FlatList
                         data={guests}
                         renderItem={renderGuestItem}
-                        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+                        keyExtractor={(item, index) => item.ticket_id?.toString() || item.id?.toString() || index.toString()}
                         contentContainerStyle={styles.listContainer}
                         refreshControl={
                               <RefreshControl

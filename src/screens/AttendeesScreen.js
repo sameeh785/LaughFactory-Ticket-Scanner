@@ -4,17 +4,14 @@ import {
       Text,
       StyleSheet,
       FlatList,
-      TouchableOpacity,
       RefreshControl,
-      Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors, commonStyles } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
-import apiService from '../services/apiService';
+import { showAPI } from '../services/apiEndpoints';
 
 const AttendeesScreen = () => {
-      const navigation = useNavigation();
       const route = useRoute();
       const { show } = route.params || {};
       
@@ -36,29 +33,12 @@ const AttendeesScreen = () => {
 
       const fetchAttendees = async () => {
             try {
-                  setLoading(true);
-                  // TODO: Replace with actual API endpoint
-                  const response = await apiService.get(`/shows/${show.id}/attendees`);
-                  setAttendees(response.data || []);
+                  const response = await showAPI.getTicketsByShow(show.id, show.date_id);
+                  const payload = response?.data?.data ?? response?.data ?? [];
+                  const normalized = Array.isArray(payload) ? payload : (payload ? [payload] : []);
+                  setAttendees(normalized);
             } catch (error) {
-                  console.error('Error fetching attendees:', error);
-                  // For development, show mock data instead of error
-                  setAttendees([
-                        {
-                              id: 1,
-                              name: 'John Doe',
-                              ticket_number: 'TKT-001',
-                              email: 'john@example.com',
-                              check_in_time: new Date().toISOString()
-                        },
-                        {
-                              id: 2,
-                              name: 'Jane Smith',
-                              ticket_number: 'TKT-002',
-                              email: 'jane@example.com',
-                              check_in_time: new Date(Date.now() - 30 * 60 * 1000).toISOString()
-                        }
-                  ]);
+                  console.error('Error fetching guest list:', error);
             } finally {
                   setLoading(false);
             }
@@ -75,26 +55,24 @@ const AttendeesScreen = () => {
       }, [show.id]);
 
       const renderAttendeeItem = ({ item, index }) => (
-            <View style={styles.attendeeItem}>
-                  <View style={styles.attendeeInfo}>
-                        <Text style={styles.attendeeName}>{item.name}</Text>
-                        <Text style={styles.ticketNumber}>Ticket: {item.ticket_number}</Text>
-                        {item.email && (
-                              <Text style={styles.attendeeEmail}>{item.email}</Text>
-                        )}
-                  </View>
-                  <View style={styles.checkInInfo}>
-                        <Text style={styles.checkInTime}>
-                              {new Date(item.check_in_time).toLocaleTimeString('en-US', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                              })}
+            <View style={styles.guestItem}>
+                  <View style={styles.guestInfo}>
+                        <Text style={styles.guestName}>{item.attendee || 'Unnamed Guest'}</Text>
+                        {item.ticket_code ? (
+                              <Text style={styles.guestEmail}>Ticket: {item.ticket_code}</Text>
+                        ) : null}
+                        <Text style={styles.guestPhone}>
+                              {item.is_scanned
+                                    ? (item.scanned_at ? `Scanned at: ${new Date(item.scanned_at).toLocaleString()}` : 'Scanned')
+                                    : 'Scan pending'}
                         </Text>
-                        <Text style={styles.checkInDate}>
-                              {new Date(item.check_in_time).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                              })}
+                  </View>
+                  <View style={styles.guestStatus}>
+                        <Text style={[
+                              styles.statusText,
+                              { color: item.is_scanned ? colors.success : colors.warning }
+                        ]}>
+                              {item.is_scanned ? '✅ Scanned' : '⏳ Not Scanned'}
                         </Text>
                   </View>
             </View>
@@ -163,7 +141,7 @@ const styles = StyleSheet.create({
             color: colors.textSecondary,
             marginBottom: 8,
       },
-      attendeeCount: {
+      guestCount: {
             fontSize: 14,
             color: colors.primary,
             fontWeight: '600',
@@ -171,7 +149,7 @@ const styles = StyleSheet.create({
       listContainer: {
             padding: 16,
       },
-      attendeeItem: {
+      guestItem: {
             backgroundColor: colors.surface,
             borderRadius: 12,
             padding: 16,
@@ -180,38 +158,30 @@ const styles = StyleSheet.create({
             alignItems: 'center',
             ...commonStyles.shadow,
       },
-      attendeeInfo: {
+      guestInfo: {
             flex: 1,
       },
-      attendeeName: {
+      guestName: {
             fontSize: 16,
             fontWeight: '600',
             color: colors.text,
             marginBottom: 4,
       },
-      ticketNumber: {
+      guestEmail: {
             fontSize: 14,
-            color: colors.primary,
-            fontWeight: '500',
+            color: colors.textSecondary,
             marginBottom: 2,
       },
-      attendeeEmail: {
+      guestPhone: {
             fontSize: 14,
             color: colors.textSecondary,
       },
-      checkInInfo: {
+      guestStatus: {
             marginLeft: 12,
-            alignItems: 'flex-end',
       },
-      checkInTime: {
-            fontSize: 14,
-            fontWeight: '600',
-            color: colors.success,
-            marginBottom: 2,
-      },
-      checkInDate: {
+      statusText: {
             fontSize: 12,
-            color: colors.textSecondary,
+            fontWeight: '600',
       },
       emptyContainer: {
             flex: 1,

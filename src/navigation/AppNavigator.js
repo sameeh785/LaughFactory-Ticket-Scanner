@@ -11,7 +11,6 @@ import LoginScreen from '../screens/LoginScreen';
 import ShowsScreen from '../screens/ShowsScreen';
 import LogoutScreen from '../screens/LogoutScreen';
 import QRScannerScreen from '../screens/QRScannerScreen';
-import TicketsScreen from '../screens/TicketsScreen';
 import GuestListScreen from '../screens/GuestListScreen';
 import AttendeesScreen from '../screens/AttendeesScreen';
 
@@ -87,7 +86,7 @@ const AppStack = () => {
                         headerShown: false,
                   }}
             >
-                  <Stack.Screen name="MainTabs" component={MainTabs} />
+                  <Stack.Screen name="AllShows" component={MainTabs} />
                   <Stack.Screen
                         name="QRScanner"
                         component={QRScannerScreen}
@@ -97,19 +96,13 @@ const AppStack = () => {
                         }}
                   />
                   <Stack.Screen
-                        name="TicketsScreen"
-                        component={TicketsScreen}
-                        options={{
-                              presentation: 'card',
-                        }}
-                  />
-                  <Stack.Screen
                         name="GuestList"
                         component={GuestListScreen}
                         options={{
                               presentation: 'card',
                               headerShown: true,
                               title: 'Guest List',
+                              headerBackTitle: 'Back',
                         }}
                   />
                   <Stack.Screen
@@ -119,6 +112,7 @@ const AppStack = () => {
                               presentation: 'card',
                               headerShown: true,
                               title: 'Attendees',
+                              headerBackTitle: 'Back',
                         }}
                   />
             </Stack.Navigator>

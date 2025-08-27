@@ -20,15 +20,8 @@ export const API_CONFIG = {
             SHOWS: '/get-shows-by-club',
             SHOW_TICKETS: '/all-show-tickets',
             SCAN_TICKET: '/scan-ticket',
-            STATS: '/dashboard/stats',
-            PROFILE: '/user/profile',
-
-            // Dummy endpoints for development (using JSONPlaceholder)
-            DUMMY: {
-                  LOGIN: '/users/1', // Simulate login
-                  USERS: '/users',
-                  POSTS: '/posts', // Will use as events
-            }
+            GUEST_LIST_BY_SHOW: '/guest-show-tickets',
+            ATTENDEES_BY_SHOW: '/attendees-by-show',
       },
 
       // Headers

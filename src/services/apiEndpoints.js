@@ -78,6 +78,22 @@ export const showAPI = {
                   };
             }
       },
+      getGuestListByShow: async (show) => {
+            try {
+                  return await apiService.post(`${API_CONFIG.ENDPOINTS.GUEST_LIST_BY_SHOW}`, {
+                        show_id: show.id,
+                        show_date_id: show.date_id
+
+                  }, {
+                        includeAuth: true,
+                  });
+            } catch (error) {
+                  return {
+                        success: false,
+                        error: error.message || 'Failed to fetch guest list'
+                  };
+            }
+      },
 
 };
 

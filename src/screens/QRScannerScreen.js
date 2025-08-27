@@ -82,7 +82,7 @@ const QRScannerScreen = ({ navigation, route }) => {
                               'Ticket Verified',
                               'Ticket scanned successfully!',
                               [
-                                    { text: 'Close', onPress: () => navigation.navigate('TicketsScreen', { show: show}) },
+                                    { text: 'Close', onPress: () => navigation.navigate('AllShows') },
                                     { text: 'Scan Again', onPress: () => {
                                           isScanningRef.current = false;
                                           isScanningRef.scanningFailed = false;

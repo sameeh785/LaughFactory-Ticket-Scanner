@@ -20,16 +20,8 @@ const ShowsScreen = ({ navigation }) => {
       const [loading, setLoading] = useState(true);
       const [refreshing, setRefreshing] = useState(false);
       const [searchQuery, setSearchQuery] = useState('');
-
-
-      useEffect(() => {
-            fetchShows();
-      }, []);
-
-      useEffect(() => {
-            filterShows();
-      }, [shows, searchQuery]);
-
+      const [selectedTab, setSelectedTab] = useState('today'); // 'today' | 'upcoming'
+      //functions
       const fetchShows = async () => {
             try {
                   const response = await showAPI.getShowsByClub(process.env.EXPO_PUBLIC_CLUB_ID);
@@ -53,14 +45,33 @@ const ShowsScreen = ({ navigation }) => {
 
       const filterShows = () => {
             let filtered = [...shows];
+
+            // Date helpers
+            const toStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const parseToLocalDate = (dateString) => {
+                  const parsed = new Date(dateString);
+                  if (isNaN(parsed)) return null;
+                  return toStartOfDay(parsed);
+            };
+            const today = toStartOfDay(new Date());
+
+            // Apply tab filter (Today vs Upcoming)
+            filtered = filtered.filter((show) => {
+                  if (!show?.date) return false;
+                  const showDay = parseToLocalDate(show.date);
+                  if (!showDay) return false;
+                  if (selectedTab === 'today') return showDay.getTime() === today.getTime();
+                  return showDay.getTime() > today.getTime();
+            });
+
             // Apply search filter
             if (searchQuery.trim()) {
                   const query = searchQuery.toLowerCase();
                   filtered = filtered.filter(show =>
-                        show.title.toLowerCase().includes(query) ||
-                        show.description.toLowerCase().includes(query) ||
+                        show.title?.toLowerCase().includes(query) ||
+                        show.description?.toLowerCase().includes(query) ||
                         (show.comedians && show.comedians.some(comedian => 
-                              comedian.name.toLowerCase().includes(query)
+                              comedian.name?.toLowerCase().includes(query)
                         ))
                   );
             }
@@ -114,7 +125,6 @@ const ShowsScreen = ({ navigation }) => {
                               style={styles.clearSearchButton}
                               onPress={() => {
                                     setSearchQuery('');
-                                    setSelectedFilter('all');
                               }}
                         >
                               <Text style={styles.clearSearchText}>Clear Search</Text>
@@ -126,7 +136,14 @@ const ShowsScreen = ({ navigation }) => {
       if (loading) {
             return <LoadingSpinner />;
       }
+      //effects
+      useEffect(() => {
+            fetchShows();
+      }, []);
 
+      useEffect(() => {
+            filterShows();
+      }, [shows, searchQuery, selectedTab]);
       return (
             <SafeAreaView style={styles.container}>
                   <View style={styles.header}>
@@ -144,6 +161,46 @@ const ShowsScreen = ({ navigation }) => {
                               leftIcon={<Text style={styles.searchIcon}>🔍</Text>}
                               style={styles.searchInput}
                         />
+                  </View>
+
+                  {/* Tabs: Today | Upcoming */}
+                  <View style={styles.filtersContainer}>
+                        <View style={styles.filtersContent}>
+                              <View style={styles.filtersRow}>
+                                    <TouchableOpacity
+                                          onPress={() => setSelectedTab('today')}
+                                          style={[
+                                                styles.filterButton,
+                                                selectedTab === 'today' && styles.filterButtonActive,
+                                          ]}
+                                    >
+                                          <Text
+                                                style={[
+                                                      styles.filterText,
+                                                      selectedTab === 'today' && styles.filterTextActive,
+                                                ]}
+                                          >
+                                                Today
+                                          </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                          onPress={() => setSelectedTab('upcoming')}
+                                          style={[
+                                                styles.filterButton,
+                                                selectedTab === 'upcoming' && styles.filterButtonActive,
+                                          ]}
+                                    >
+                                          <Text
+                                                style={[
+                                                      styles.filterText,
+                                                      selectedTab === 'upcoming' && styles.filterTextActive,
+                                                ]}
+                                          >
+                                                Upcoming
+                                          </Text>
+                                    </TouchableOpacity>
+                              </View>
+                        </View>
                   </View>
   
 
@@ -202,6 +259,10 @@ const styles = StyleSheet.create({
       },
       filtersContent: {
             paddingHorizontal: 20,
+      },
+      filtersRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
       },
       filterButton: {
             flexDirection: 'row',

@@ -12,6 +12,8 @@ import ShowsScreen from '../screens/ShowsScreen';
 import LogoutScreen from '../screens/LogoutScreen';
 import QRScannerScreen from '../screens/QRScannerScreen';
 import TicketsScreen from '../screens/TicketsScreen';
+import GuestListScreen from '../screens/GuestListScreen';
+import AttendeesScreen from '../screens/AttendeesScreen';
 
 
 // Create navigators
@@ -99,6 +101,24 @@ const AppStack = () => {
                         component={TicketsScreen}
                         options={{
                               presentation: 'card',
+                        }}
+                  />
+                  <Stack.Screen
+                        name="GuestList"
+                        component={GuestListScreen}
+                        options={{
+                              presentation: 'card',
+                              headerShown: true,
+                              title: 'Guest List',
+                        }}
+                  />
+                  <Stack.Screen
+                        name="Attendees"
+                        component={AttendeesScreen}
+                        options={{
+                              presentation: 'card',
+                              headerShown: true,
+                              title: 'Attendees',
                         }}
                   />
             </Stack.Navigator>

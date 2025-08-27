@@ -18,6 +18,8 @@ const ShowCard = ({
       show,
       onPress,
       onScanTickets,
+      onViewGuestList,
+      onViewAttendees,
 }) => {
       // Format date for display
       const formatDate = (dateString) => {
@@ -45,13 +47,13 @@ const ShowCard = ({
                   onPress={onPress}
             >
                   {/* Show Image */}
-                  {show.image && (
+                  {/* {show.image && (
                         <Image
                               source={{ uri: show.image }}
                               style={styles.showImage}
                               resizeMode="cover"
                         />
-                  )}
+                  )} */}
 
                   <View style={styles.cardContent}>
                         {/* Title and Date */}
@@ -77,7 +79,7 @@ const ShowCard = ({
                         )}
 
                         {/* Comedians */}
-                        {show.comedians && show.comedians.length > 0 && (
+                        {/* {show.comedians && show.comedians.length > 0 && (
                               <View style={styles.comediansSection}>
                                     <Text style={styles.comediansLabel}>
                                           🎤 Featuring:
@@ -105,7 +107,23 @@ const ShowCard = ({
                                           ))}
                                     </View>
                               </View>
-                        )}
+                        )} */}
+
+                        {/* Guest List and Attendees buttons */}
+                        <View style={styles.buttonRow}>
+                              <TouchableOpacity
+                                    style={styles.secondaryButton}
+                                    onPress={() => onViewGuestList?.(show)}
+                              >
+                                    <Text style={styles.secondaryButtonText}>👥 Guest List</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                    style={styles.secondaryButton}
+                                    onPress={() => onViewAttendees?.(show)}
+                              >
+                                    <Text style={styles.secondaryButtonText}>🎫 Attendees</Text>
+                              </TouchableOpacity>
+                        </View>
 
                         {/* View Tickets Button */}
                         <TouchableOpacity
@@ -209,6 +227,27 @@ const styles = StyleSheet.create({
             fontSize: 12,
             color: colors.text,
             flex: 1,
+      },
+      buttonRow: {
+            flexDirection: 'row',
+            gap: 12,
+            marginBottom: 12,
+      },
+      secondaryButton: {
+            flex: 1,
+            backgroundColor: colors.surface,
+            paddingVertical: 10,
+            paddingHorizontal: 12,
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: colors.border,
+      },
+      secondaryButtonText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: colors.text,
       },
       viewTicketsButton: {
             backgroundColor: colors.primary,

@@ -80,10 +80,20 @@ const ShowsScreen = ({ navigation }) => {
             });
       };
 
+      const handleViewGuestList = (show) => {
+            navigation.navigate('GuestList', { show });
+      };
+
+      const handleViewAttendees = (show) => {
+            navigation.navigate('Attendees', { show });
+      };
+
       const renderShow = ({ item }) => (
             <ShowCard
                   show={item}
                   onScanTickets={() => handleScanTickets(item)}
+                  onViewGuestList={() => handleViewGuestList(item)}
+                  onViewAttendees={() => handleViewAttendees(item)}
             />
       );
 

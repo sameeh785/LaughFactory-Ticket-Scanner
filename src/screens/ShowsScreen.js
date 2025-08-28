@@ -115,7 +115,6 @@ const ShowsScreen = ({ navigation }) => {
 
   const EmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>🎭</Text>
       <Text style={styles.emptyTitle}>
         {searchQuery ? "No shows found" : "No shows available"}
       </Text>
@@ -152,7 +151,7 @@ const ShowsScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🎭 Shows</Text>
+        <Text style={styles.headerTitle}>Shows</Text>
         <Text style={styles.headerSubtitle}>
           {filteredShows.length} show{filteredShows.length !== 1 ? "s" : ""}{" "}
           found

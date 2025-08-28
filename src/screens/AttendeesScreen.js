@@ -72,7 +72,7 @@ const AttendeesScreen = () => {
                               styles.statusText,
                               { color: item.is_scanned ? colors.success : colors.warning }
                         ]}>
-                              {item.is_scanned ? '✅ Scanned' : '⏳ Not Scanned'}
+                              {item.is_scanned ? '✅ Checked In' : '⏳ Not Scanned'}
                         </Text>
                   </View>
             </View>
@@ -82,14 +82,21 @@ const AttendeesScreen = () => {
             return <LoadingSpinner />;
       }
 
+      const scannedCount = attendees.filter(a => a?.is_scanned).length;
+
       return (
             <View style={styles.container}>
                   <View style={styles.header}>
                         <Text style={styles.title}>🎫 Attendees</Text>
                         <Text style={styles.subtitle}>{show.title}</Text>
-                        <Text style={styles.attendeeCount}>
-                              {attendees.length} {attendees.length === 1 ? 'Attendee' : 'Attendees'} Checked In
-                        </Text>
+                        <View style={styles.countsRow}>
+                              <Text style={styles.countBadge}>
+                                    Total: {attendees.length}
+                              </Text>
+                              <Text style={[styles.countBadge, styles.countBadgeScanned]}>
+                              Checked In: {scannedCount}
+                              </Text>
+                        </View>
                   </View>
 
                   <FlatList
@@ -141,10 +148,26 @@ const styles = StyleSheet.create({
             color: colors.textSecondary,
             marginBottom: 8,
       },
-      guestCount: {
+      countsRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+      },
+      countBadge: {
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            color: colors.text,
             fontSize: 14,
-            color: colors.primary,
             fontWeight: '600',
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 999,
+            overflow: 'hidden',
+      },
+      countBadgeScanned: {
+            borderColor: colors.primary,
+            color: colors.primary,
       },
       listContainer: {
             padding: 16,

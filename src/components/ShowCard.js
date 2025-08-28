@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
             marginBottom: 12,
       },
       title: {
-            fontSize: 20,
+            fontSize: 24,
             fontWeight: 'bold',
             color: colors.text,
             marginBottom: 8,
@@ -167,14 +167,14 @@ const styles = StyleSheet.create({
             alignItems: 'center',
       },
       dateText: {
-            fontSize: 14,
-            fontWeight: '500',
-            color: colors.textSecondary,
+            fontSize: 18,
+            fontWeight: '700',
+            color: colors.primary,
       },
       timeText: {
-            fontSize: 14,
-            fontWeight: '500',
-            color: colors.textSecondary,
+            fontSize: 18,
+            fontWeight: '700',
+            color: colors.primary,
       },
       description: {
             fontSize: 14,

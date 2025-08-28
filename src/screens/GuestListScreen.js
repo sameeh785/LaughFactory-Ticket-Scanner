@@ -55,25 +55,47 @@ const GuestListScreen = () => {
       }, [show.id]);
 
       const renderGuestItem = ({ item, index }) => (
-            <View style={styles.guestItem}>
+            <View style={[
+                  styles.guestItem,
+                  item.is_scanned ? styles.guestItemChecked : styles.guestItemPending
+            ]}>
                   <View style={styles.guestInfo}>
-                        <Text style={styles.guestName}>{item.vip_guest || 'Unnamed Guest'}</Text>
+                  <View style={styles.fieldRow}>
+                              <Text style={styles.labelBold}>Name:</Text>
+                              <Text style={styles.fieldValue}>{item.vip_guest.name || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.fieldRow}>
+                              <Text style={styles.labelBold}>Email:</Text>
+                              <Text style={styles.fieldValue}>{item.vip_guest.email || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.fieldRow}>
+                              <Text style={styles.labelBold}>Phone:</Text>
+                              <Text style={styles.fieldValue}>{item.vip_guest.phone || 'N/A'}</Text>
+                        </View>
                         {item.ticket_code ? (
-                              <Text style={styles.guestEmail}>Ticket: {item.ticket_code}</Text>
+                              <View style={styles.fieldRow}>
+                                    <Text style={styles.labelBold}>Ticket:</Text>
+                                    <Text style={styles.ticketCode}>{item.ticket_code}</Text>
+                              </View>
                         ) : null}
-                        <Text style={styles.guestPhone}>
+                        <Text style={styles.metaText}>
                               {item.is_scanned
                                     ? (item.scanned_at ? `Scanned at: ${new Date(item.scanned_at).toLocaleString()}` : 'Scanned')
                                     : 'Scan pending'}
                         </Text>
                   </View>
                   <View style={styles.guestStatus}>
-                        <Text style={[
-                              styles.statusText,
-                              { color: item.is_scanned ? colors.success : colors.warning }
+                        <View style={[
+                              styles.statusBadge,
+                              item.is_scanned ? styles.statusBadgePrimary : styles.statusBadgeWarning
                         ]}>
-                              {item.is_scanned ? '✅ Checked In' : '⏳ Not Scanned'}
-                        </Text>
+                              <Text style={[
+                                    styles.statusBadgeText,
+                                    item.is_scanned ? styles.statusBadgeTextPrimary : styles.statusBadgeTextWarning
+                              ]}>
+                                    {item.is_scanned ? '✅ Checked In' : '⏳ Not Scanned'}
+                              </Text>
+                        </View>
                   </View>
             </View>
       );
@@ -180,31 +202,72 @@ const styles = StyleSheet.create({
             flexDirection: 'row',
             alignItems: 'center',
             ...commonStyles.shadow,
+            position: 'relative',
+      },
+      guestItemChecked: {
+            borderWidth: 1,
+            borderColor: colors.primary,
+      },
+      guestItemPending: {
+            borderWidth: 1,
+            borderColor: colors.border,
       },
       guestInfo: {
             flex: 1,
       },
-      guestName: {
-            fontSize: 16,
-            fontWeight: '600',
-            color: colors.text,
-            marginBottom: 4,
-      },
-      guestEmail: {
-            fontSize: 14,
-            color: colors.textSecondary,
+      fieldRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
             marginBottom: 2,
+            flexWrap: 'wrap',
+            gap: 6,
       },
-      guestPhone: {
+      labelBold: {
+            fontWeight: '700',
+            color: colors.text,
+      },
+      fieldValue: {
             fontSize: 14,
+            color: colors.text,
+      },
+      ticketCode: {
+            fontSize: 14,
+            color: colors.primary,
+            fontWeight: '700',
+      },
+      metaText: {
+            fontSize: 12,
             color: colors.textSecondary,
+            marginTop: 6,
       },
       guestStatus: {
-            marginLeft: 12,
+            position: 'absolute',
+            right: 4,
+            top: 4,
       },
-      statusText: {
+      statusBadge: {
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 999,
+            borderWidth: 1,
+      },
+      statusBadgePrimary: {
+            borderColor: colors.primary,
+            backgroundColor: 'transparent',
+      },
+      statusBadgeWarning: {
+            borderColor: colors.warning,
+            backgroundColor: 'transparent',
+      },
+      statusBadgeText: {
             fontSize: 12,
-            fontWeight: '600',
+            fontWeight: '700',
+      },
+      statusBadgeTextPrimary: {
+            color: colors.primary,
+      },
+      statusBadgeTextWarning: {
+            color: colors.warning,
       },
       emptyContainer: {
             flex: 1,

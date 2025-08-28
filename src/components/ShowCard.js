@@ -121,7 +121,7 @@ const ShowCard = ({
                                     style={styles.secondaryButton}
                                     onPress={() => onViewAttendees?.(show)}
                               >
-                                    <Text style={styles.secondaryButtonText}>🎫 Attendees</Text>
+                                    <Text style={styles.secondaryButtonText}>🎫 Attendees {show.attendees ?? 0}</Text>
                               </TouchableOpacity>
                         </View>
 

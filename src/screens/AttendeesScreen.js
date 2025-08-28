@@ -6,7 +6,7 @@ import {
       FlatList,
       RefreshControl,
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import { colors, commonStyles } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { showAPI } from '../services/apiEndpoints';
@@ -54,26 +54,57 @@ const AttendeesScreen = () => {
             fetchAttendees();
       }, [show.id]);
 
+      const getInitials = (name) => {
+            if (!name || typeof name !== 'string') return '?';
+            const parts = name.trim().split(/\s+/).filter(Boolean);
+            const first = parts[0]?.[0] || '';
+            const second = parts[1]?.[0] || '';
+            return `${first}${second}`.toUpperCase() || '?';
+      };
+
       const renderAttendeeItem = ({ item, index }) => (
-            <View style={styles.guestItem}>
-                  <View style={styles.guestInfo}>
-                        <Text style={styles.guestName}>{item.attendee || 'Unnamed Guest'}</Text>
+            <View style={[
+                  styles.attendeeItem,
+                  item.is_scanned ? styles.attendeeItemChecked : styles.attendeeItemPending
+            ]}>
+                  <View style={styles.attendeeInfo}>
+                        <View style={styles.fieldRow}>
+                              <Text style={styles.labelBold}>Name:</Text>
+                              <Text style={styles.fieldValue}>{item.attendee.name || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.fieldRow}>
+                              <Text style={styles.labelBold}>Email:</Text>
+                              <Text style={styles.fieldValue}>{item.attendee.email || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.fieldRow}>
+                              <Text style={styles.labelBold}>Phone:</Text>
+                              <Text style={styles.fieldValue}>{item.attendee.phone || 'N/A'}</Text>
+                        </View>
+
                         {item.ticket_code ? (
-                              <Text style={styles.guestEmail}>Ticket: {item.ticket_code}</Text>
+                              <View style={styles.fieldRow}>
+                                    <Text style={styles.labelBold}>Ticket:</Text>
+                                    <Text style={styles.ticketCode}>{item.ticket_code}</Text>
+                              </View>
                         ) : null}
-                        <Text style={styles.guestPhone}>
+                        <Text style={styles.metaText}>
                               {item.is_scanned
                                     ? (item.scanned_at ? `Scanned at: ${new Date(item.scanned_at).toLocaleString()}` : 'Scanned')
                                     : 'Scan pending'}
                         </Text>
                   </View>
-                  <View style={styles.guestStatus}>
-                        <Text style={[
-                              styles.statusText,
-                              { color: item.is_scanned ? colors.success : colors.warning }
+                  <View style={styles.attendeeStatus}>
+                        <View style={[
+                              styles.statusBadge,
+                              item.is_scanned ? styles.statusBadgePrimary : styles.statusBadgeWarning
                         ]}>
-                              {item.is_scanned ? '✅ Checked In' : '⏳ Not Scanned'}
-                        </Text>
+                              <Text style={[
+                                    styles.statusBadgeText,
+                                    item.is_scanned ? styles.statusBadgeTextPrimary : styles.statusBadgeTextWarning
+                              ]}>
+                                    {item.is_scanned ? '✅ Checked In' : '⏳ Not Scanned'}
+                              </Text>
+                        </View>
                   </View>
             </View>
       );
@@ -172,7 +203,7 @@ const styles = StyleSheet.create({
       listContainer: {
             padding: 16,
       },
-      guestItem: {
+      attendeeItem: {
             backgroundColor: colors.surface,
             borderRadius: 12,
             padding: 16,
@@ -180,31 +211,91 @@ const styles = StyleSheet.create({
             flexDirection: 'row',
             alignItems: 'center',
             ...commonStyles.shadow,
+            position: 'relative',
       },
-      guestInfo: {
+      attendeeItemChecked: {
+            borderWidth: 1,
+            borderColor: colors.primary,
+      },
+      attendeeItemPending: {
+            borderWidth: 1,
+            borderColor: colors.border,
+      },
+      avatar: {
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 2,
+      },
+      avatarChecked: {
+            borderColor: colors.primary,
+      },
+      avatarPending: {
+            borderColor: colors.border,
+      },
+      avatarText: {
+            fontSize: 14,
+            fontWeight: '700',
+            color: colors.text,
+      },
+      attendeeInfo: {
             flex: 1,
       },
-      guestName: {
-            fontSize: 16,
-            fontWeight: '600',
-            color: colors.text,
-            marginBottom: 4,
-      },
-      guestEmail: {
-            fontSize: 14,
-            color: colors.textSecondary,
+      fieldRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
             marginBottom: 2,
+            flexWrap: 'wrap',
+            gap: 6,
       },
-      guestPhone: {
-            fontSize: 14,
-            color: colors.textSecondary,
+      labelBold: {
+            fontWeight: '700',
+            color: colors.text,
       },
-      guestStatus: {
-            marginLeft: 12,
+      attendeeStatus: {
+            position: 'absolute',
+            right: 4,
+            top: 4,
       },
-      statusText: {
+      statusBadge: {
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 999,
+            borderWidth: 1,
+      },
+      statusBadgePrimary: {
+            borderColor: colors.primary,
+            backgroundColor: 'transparent',
+      },
+      statusBadgeWarning: {
+            borderColor: colors.warning,
+            backgroundColor: 'transparent',
+      },
+      statusBadgeText: {
             fontSize: 12,
-            fontWeight: '600',
+            fontWeight: '700',
+      },
+      statusBadgeTextPrimary: {
+            color: colors.primary,
+      },
+      statusBadgeTextWarning: {
+            color: colors.warning,
+      },
+      fieldValue: {
+            fontSize: 14,
+            color: colors.text,
+      },
+      ticketCode: {
+            fontSize: 14,
+            color: colors.primary,
+            fontWeight: '700',
+      },
+      metaText: {
+            fontSize: 12,
+            color: colors.textSecondary,
+            marginTop: 6,
       },
       emptyContainer: {
             flex: 1,

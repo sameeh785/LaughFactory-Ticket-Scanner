@@ -14,6 +14,10 @@ import { showAPI } from '../services/apiEndpoints';
 const GuestListScreen = () => {
       const route = useRoute();
       const { show } = route.params || {};
+      const [guests, setGuests] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [refreshing, setRefreshing] = useState(false);
+      const [tableData, setTableData] = useState([]);
       
       // Handle case where show is not provided
       if (!show) {
@@ -27,9 +31,6 @@ const GuestListScreen = () => {
             );
       }
       
-      const [guests, setGuests] = useState([]);
-      const [loading, setLoading] = useState(true);
-      const [refreshing, setRefreshing] = useState(false);
 
       const fetchGuestList = async () => {
             try {
@@ -100,25 +101,78 @@ const GuestListScreen = () => {
             </View>
       );
 
-      if (loading) {
+      useEffect(() => {
+            if (guests.length > 0) {
+              const updatedTableData = [];
+              const record = {
+                total: {
+                  sold: guests?.length || 0,
+                  scanned: guests?.filter((a) => a?.is_scanned).length || 0,
+                },
+              };
+              guests.forEach((item) => {
+                if (item?.ticket_type?.name) {
+                  record[item?.ticket_type?.name] = {
+                    sold: record[item?.ticket_type?.name]?.sold ? record[item?.ticket_type?.name].sold + 1 : 1,
+                    scanned: record[item?.ticket_type?.name]?.scanned ? record[item?.ticket_type?.name].scanned + (item.is_scanned ? 1 : 0) : (item.is_scanned ? 1 : 0),
+                  };
+                }
+              });
+              Object.keys(record).forEach((key) => {
+                updatedTableData.push({
+                  category: key,
+                  sold: record[key].sold,
+                  scanned: record[key].scanned,
+                });
+              });
+              setTableData(updatedTableData);
+            }
+          }, [guests]);
+          if (loading) {
             return <LoadingSpinner />;
-      }
-
-      const scannedCount = guests.filter(g => g?.is_scanned).length;
-
+          }
+        
+          if (!show) {
+            return (
+              <View style={styles.container}>
+                <View style={styles.header}>
+                  <Text style={styles.title}>👥 Guest List</Text>
+                  <Text style={styles.subtitle}>Show not found</Text>
+                </View>
+              </View>
+            );
+          }
+          if (guests.length === 0) {
+            return (
+              <View style={styles.container}>
+                <View style={styles.header}>
+                  <Text style={styles.title}>👥 Guest List</Text>
+                  <Text style={styles.subtitle}>No guests found</Text>
+                </View>
+              </View>
+            );
+          }
+          console.log("tableData", tableData);
       return (
             <View style={styles.container}>
                   <View style={styles.header}>
                         <Text style={styles.title}>👥 Guest List</Text>
                         <Text style={styles.subtitle}>{show.title}</Text>
-                        <View style={styles.countsRow}>
-                              <Text style={styles.countBadge}>
-                                    Total: {guests.length}
-                              </Text>
-                              <Text style={[styles.countBadge, styles.countBadgeScanned]}>
-                                    Scanned: {scannedCount}
-                              </Text>
+                           {/* Ticket Sales Table */}
+                  <View style={styles.tableContainer}>
+                        <View style={styles.tableHeader}>
+                              <Text style={styles.tableHeaderCategoryText}></Text>
+                              <Text style={styles.tableHeaderText}>Sold</Text>
+                              <Text style={styles.tableHeaderText}>Scanned</Text>
                         </View>
+                        {tableData?.map((row, index) => (
+                              <View key={index} style={styles.tableRow}>
+                                    <Text style={styles.tableCategoryText}>{row.category}</Text>
+                                    <Text style={styles.tableDataText}>{row.sold}</Text>
+                                    <Text style={styles.tableDataText}>{row.scanned}</Text>
+                              </View>
+                        ))}
+                  </View>
                   </View>
 
                   <FlatList
@@ -254,6 +308,59 @@ const styles = StyleSheet.create({
       statusBadgePrimary: {
             borderColor: colors.primary,
             backgroundColor: 'transparent',
+      },
+      tableContainer: {
+            backgroundColor: colors.surface,
+            margin: 16,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            ...commonStyles.shadow,
+      },
+      tableHeader: {
+            flexDirection: 'row',
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+      },
+      tableHeaderCategoryText: {
+            flex: 2,
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: colors.text,
+            textAlign: 'left',
+      },
+      tableHeaderText: {
+            flex: 1,
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: colors.text,
+            textAlign: 'center',
+      },
+      tableRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+      },
+      tableCategoryText: {
+            flex: 2,
+            fontSize: 14,
+            fontWeight: '600',
+            color: colors.text,
+            textAlign: 'left',
+      },
+      tableDataText: {
+            flex: 1,
+            fontSize: 14,
+            color: colors.text,
+            textAlign: 'center',
       },
       statusBadgeWarning: {
             borderColor: colors.warning,

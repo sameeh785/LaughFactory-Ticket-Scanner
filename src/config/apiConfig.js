@@ -22,6 +22,7 @@ export const API_CONFIG = {
             SCAN_TICKET: '/scan-ticket',
             GUEST_LIST_BY_SHOW: '/guest-show-tickets',
             ATTENDEES_BY_SHOW: '/attendees-by-show',
+            SHOW_DETAILS_BY_DATE_ID: '/get-show-by-date',
       },
 
       // Headers

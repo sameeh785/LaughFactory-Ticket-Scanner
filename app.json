@@ -2,7 +2,7 @@
   "expo": {
     "name": "LaughFactory Ticket Scanning",
     "slug": "laughfactory-ticket-scanning",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -47,7 +47,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "74067dbf-9ed8-45da-9dfb-9a333573fbc3"
+        "projectId": "dca153b6-b9b0-44e5-8e0c-7a32f438881c"
       }
     }
   }

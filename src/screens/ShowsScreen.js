@@ -28,9 +28,7 @@ const ShowsScreen = ({ navigation }) => {
         process.env.EXPO_PUBLIC_CLUB_ID
       );
       if (response?.success && response?.data?.data?.length > 0) {
-        setShows(response.data.data);
-      } else {
-        console.error("Failed to fetch shows:", response.error);
+        setShows(response?.data?.data);
       }
     } catch (error) {
       console.error("Error fetching shows:", error);
@@ -103,6 +101,10 @@ const ShowsScreen = ({ navigation }) => {
   const handleViewAttendees = (show) => {
     navigation.navigate("Attendees", { show });
   };
+  const handleViewEventDetails = (show) => {
+    navigation.navigate("EventDetails",{showDateId:show.date_id});
+  };
+
 
   const renderShow = ({ item }) => (
     <ShowCard
@@ -110,6 +112,7 @@ const ShowsScreen = ({ navigation }) => {
       onScanTickets={() => handleScanTickets(item)}
       onViewGuestList={() => handleViewGuestList(item)}
       onViewAttendees={() => handleViewAttendees(item)}
+      onViewEventDetails={() => handleViewEventDetails(item)}
     />
   );
 

@@ -13,6 +13,8 @@ import LogoutScreen from '../screens/LogoutScreen';
 import QRScannerScreen from '../screens/QRScannerScreen';
 import GuestListScreen from '../screens/GuestListScreen';
 import AttendeesScreen from '../screens/AttendeesScreen';
+import EventDetailsScreen from '../screens/EventDetailScreen';
+
 
 
 // Create navigators
@@ -112,6 +114,16 @@ const AppStack = () => {
                               presentation: 'card',
                               headerShown: true,
                               title: 'Attendees',
+                              headerBackTitle: 'Back',
+                        }}
+                  />
+                    <Stack.Screen
+                        name="EventDetails"
+                        component={EventDetailsScreen}
+                        options={{
+                              presentation: 'card',
+                              headerShown: true,
+                              title: 'Event Details',
                               headerBackTitle: 'Back',
                         }}
                   />

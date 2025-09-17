@@ -108,10 +108,11 @@ export const calculatePercentage = (value, total) => {
  * @param {string} message - Message to show
  * @param {string} type - Toast type ('success', 'error', 'info')
  */
-export const showToast = (message, type = 'info') => {
+export const showToast = (message, type = 'info', position = 'top') => {
       Toast.show({
             type: type,
             text1: message,
+            position: position,
       });
 };
 

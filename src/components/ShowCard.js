@@ -20,6 +20,7 @@ const ShowCard = ({
       onScanTickets,
       onViewGuestList,
       onViewAttendees,
+      onViewEventDetails,
 }) => {
       // Format date for display
       const formatDate = (dateString) => {
@@ -29,16 +30,13 @@ const ShowCard = ({
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric'
-            });
+            }).toString();
       };
 
       // Format time for display
       const formatTime = (timeString) => {
             const [hours, minutes] = timeString.split(':');
-            const hour = parseInt(hours);
-            const ampm = hour >= 12 ? 'PM' : 'AM';
-            const displayHour = hour % 12 || 12;
-            return `${displayHour}:${minutes} ${ampm}`;
+            return `${hours}:${minutes}`;
       };
 
       return (
@@ -109,7 +107,7 @@ const ShowCard = ({
                               </View>
                         )} */}
 
-                        {/* Guest List and Attendees buttons */}
+                        {/* Guest List, Attendees and Event Details buttons */}
                         <View style={styles.buttonRow}>
                               <TouchableOpacity
                                     style={styles.secondaryButton}
@@ -123,6 +121,13 @@ const ShowCard = ({
                               >
                                     <Text style={styles.secondaryButtonText}>🎫 Attendees {show.attendees ?? 0}</Text>
                               </TouchableOpacity>
+                              <TouchableOpacity
+                                    style={styles.secondaryButton}
+                                    onPress={() => onViewEventDetails?.(show)}
+                              >
+                                    <Text style={styles.secondaryButtonText}>🎥 Event Details</Text>
+                              </TouchableOpacity>
+
                         </View>
 
                         {/* View Tickets Button */}
@@ -230,11 +235,13 @@ const styles = StyleSheet.create({
       },
       buttonRow: {
             flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
             gap: 12,
             marginBottom: 12,
       },
       secondaryButton: {
-            flex: 1,
+            width: '45%',
             backgroundColor: colors.surface,
             paddingVertical: 10,
             paddingHorizontal: 12,

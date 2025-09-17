@@ -25,12 +25,13 @@ const ShowCard = ({
       // Format date for display
       const formatDate = (dateString) => {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
+             return date.toLocaleDateString('en-US', {
                   weekday: 'short',
                   year: 'numeric',
                   month: 'short',
-                  day: 'numeric'
-            }).toString();
+                  day: 'numeric',
+                  timeZone: 'UTC'
+            });
       };
 
       // Format time for display

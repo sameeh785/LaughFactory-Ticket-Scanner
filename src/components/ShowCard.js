@@ -4,9 +4,10 @@ import {
       Text,
       TouchableOpacity,
       StyleSheet,
-      Image,
-} from 'react-native';
+      useWindowDimensions,
+      } from 'react-native';
 import { colors, commonStyles } from '../utils/helpers';
+import RenderHTML from 'react-native-render-html';
 
 /**
  * Show Card Component
@@ -22,6 +23,7 @@ const ShowCard = ({
       onViewAttendees,
       onViewEventDetails,
 }) => {
+      const { width } = useWindowDimensions();
       // Format date for display
       const formatDate = (dateString) => {
             const date = new Date(dateString);
@@ -72,9 +74,11 @@ const ShowCard = ({
 
                         {/* Description */}
                         {show.description && (
-                              <Text style={styles.description} numberOfLines={3}>
-                                    {show.description}
-                              </Text>
+                              <RenderHTML
+                                    contentWidth={width}
+                                    source={{ html: String(show.description) }}
+                                    baseStyle={styles.description}
+                              />
                         )}
 
                         {/* Comedians */}

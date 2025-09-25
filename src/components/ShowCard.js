@@ -7,7 +7,6 @@ import {
       useWindowDimensions,
       } from 'react-native';
 import { colors, commonStyles } from '../utils/helpers';
-import RenderHTML from 'react-native-render-html';
 
 /**
  * Show Card Component
@@ -71,15 +70,6 @@ const ShowCard = ({
                                     </Text>
                               </View>
                         </View>
-
-                        {/* Description */}
-                        {show.description && (
-                              <RenderHTML
-                                    contentWidth={width}
-                                    source={{ html: String(show.description) }}
-                                    baseStyle={styles.description}
-                              />
-                        )}
 
                         {/* Comedians */}
                         {/* {show.comedians && show.comedians.length > 0 && (

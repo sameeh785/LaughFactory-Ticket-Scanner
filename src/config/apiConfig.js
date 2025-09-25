@@ -5,7 +5,7 @@
 export const API_CONFIG = {
       // Base URLs
       BASE_URL: process.env.EXPO_PUBLIC_API_URL,
-      TIMEOUT: process.env.EXPO_PUBLIC_API_TIMEOUT || 10000,
+      TIMEOUT: process.env.EXPO_PUBLIC_API_TIMEOUT || 30000,
       BASIC_AUTH_USERNAME: process.env.EXPO_PUBLIC_BASIC_AUTH_USERNAME,
       BASIC_AUTH_PASSWORD: process.env.EXPO_PUBLIC_BASIC_AUTH_PASSWORD,
 

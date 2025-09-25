@@ -119,7 +119,6 @@ const AttendeesScreen = () => {
           };
         }
       });
-      console.log("record", record);
       Object.keys(record).forEach((key) => {
         updatedTableData.push({
           category: key,
@@ -144,7 +143,7 @@ const AttendeesScreen = () => {
       </View>
     );
   }
-  console.log("attendees", attendees);
+
   if (attendees.length === 0) {
     return (
       <View style={styles.container}>

@@ -152,7 +152,7 @@ const GuestListScreen = () => {
               </View>
             );
           }
-          console.log("tableData", tableData);
+
       return (
             <View style={styles.container}>
                   <View style={styles.header}>

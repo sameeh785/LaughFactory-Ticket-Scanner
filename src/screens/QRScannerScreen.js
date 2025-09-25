@@ -75,12 +75,11 @@ const QRScannerScreen = ({ navigation, route }) => {
 
                   // Call scan API
                   const response = await scanAPI.scanTicket(show.id, show.date_id, data);
-
                   if (response.success) {
                         const ticketData = response.data;
                         Alert.alert(
-                              'Ticket Verified',
                               'Ticket scanned successfully!',
+                              response?.data?.data?.order_notes?.map((item)=>item.note).join("\n"),
                               [
                                     { text: 'Close', onPress: () => navigation.navigate('AllShows') },
                                     { text: 'Scan Again', onPress: () => {

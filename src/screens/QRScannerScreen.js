@@ -6,6 +6,8 @@ import {
       Alert,
       TouchableOpacity,
       Vibration,
+      Modal,
+      ScrollView,
 } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +22,8 @@ const QRScannerScreen = ({ navigation, route }) => {
       const [scanned, setScanned] = useState(false);
       const [scanning, setScanning] = useState(false);
       const [flashOn, setFlashOn] = useState(false);
+      const [showNotesModal, setShowNotesModal] = useState(false);
+      const [notesText, setNotesText] = useState('');
       
       // Use refs for immediate state tracking
       const isScanningRef = useRef(false);
@@ -75,21 +79,11 @@ const QRScannerScreen = ({ navigation, route }) => {
 
                   // Call scan API
                   const response = await scanAPI.scanTicket(show.id, show.date_id, data);
-                  if (response.success) {
-                        const ticketData = response.data;
-                        Alert.alert(
-                              'Ticket scanned successfully!',
-                              response?.data?.data?.order_notes?.map((item)=>item.note).join("\n"),
-                              [
-                                    { text: 'Close', onPress: () => navigation.navigate('AllShows') },
-                                    { text: 'Scan Again', onPress: () => {
-                                          isScanningRef.current = false;
-                                          isScanningRef.scanningFailed = false;
-                                          setScanned(false);
-                                          setScanning(false);
-                                    } }
-                              ]
-                        );;
+                  if (response.success) {         
+                        const notesArray = response?.data?.data?.order_notes || [];
+                        const combinedNotes = notesArray.map((item) => item?.note).filter(Boolean).join("\n");
+                        setNotesText(combinedNotes || '');
+                        setShowNotesModal(true);
                        
                   } else {
                         isScanningRef.scanningFailed = true;
@@ -246,6 +240,47 @@ const QRScannerScreen = ({ navigation, route }) => {
                               }
                         </Text>
                   </View> */}
+
+                  {/* Notes Modal (scrollable) */}
+                  <Modal
+                        visible={showNotesModal}
+                        transparent
+                        animationType="slide"
+                        onRequestClose={() => setShowNotesModal(false)}
+                  >
+                        <View style={styles.modalOverlay}>
+                              <View style={styles.modalCard}>
+                                    <Text style={styles.modalTitle}>Ticket scanned successfully!</Text>
+                                    <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalScrollContent}>
+                                          <Text style={styles.modalNotesText}>
+                                                {notesText || 'No notes available.'}
+                                          </Text>
+                                    </ScrollView>
+                                    <View style={styles.modalButtonsRow}>
+                                          <Button
+                                                title="Close"
+                                                variant="outline"
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                      setShowNotesModal(false);
+                                                      navigation.navigate('AllShows');
+                                                }}
+                                          />
+                                          <Button
+                                                title="Scan Again"
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                      setShowNotesModal(false);
+                                                      isScanningRef.current = false;
+                                                      isScanningRef.scanningFailed = false;
+                                                      setScanned(false);
+                                                      setScanning(false);
+                                                }}
+                                          />
+                                    </View>
+                              </View>
+                        </View>
+                  </Modal>
             </SafeAreaView>
       );
 };
@@ -414,6 +449,48 @@ const styles = StyleSheet.create({
       permissionButton: {
             width: '100%',
             marginBottom: 12,
+      },
+      modalOverlay: {
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+      },
+      modalCard: {
+            width: '100%',
+            maxHeight: '80%',
+            backgroundColor: colors.background,
+            borderRadius: 12,
+            padding: 16,
+            ...commonStyles.shadow,
+      },
+      modalTitle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            color: colors.primary,
+            textAlign: 'center',
+            marginBottom: 12,
+      },
+      modalScroll: {
+            maxHeight: 320,
+            marginBottom: 16,
+      },
+      modalScrollContent: {
+            paddingVertical: 4,
+      },
+      modalNotesText: {
+            fontSize: 14,
+            color: colors.text,
+            lineHeight: 20,
+      },
+      modalButtonsRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 12,
+      },
+      modalButton: {
+            flex: 1,
       },
 });
 
